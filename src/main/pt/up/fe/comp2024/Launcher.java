@@ -17,6 +17,7 @@ import java.util.Map;
 public class Launcher {
 
     public static void main(String[] args) {
+
         SpecsSystem.programStandardInit();
 
         Map<String, String> config = CompilerConfig.parseArgs(args);
@@ -56,6 +57,7 @@ public class Launcher {
 
         // Print Jasmin code
         //System.out.println(jasminResult.getJasminCode());
+
     }
 
 }
