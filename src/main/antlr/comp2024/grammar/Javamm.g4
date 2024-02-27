@@ -23,6 +23,8 @@ NOT : '!';
 VOID : 'void';
 MAIN : 'main';
 COMMA : ',';
+LENGTH : 'length';
+
 
 CLASS : 'class' ;
 INT : 'int' ;
@@ -37,6 +39,7 @@ ELSE : 'else';
 WHILE : 'while';
 EXTENDS : 'extends';
 STATIC : 'static';
+NEW : 'new';
 
 
 INTEGER : [0-9]+ ;
@@ -67,13 +70,14 @@ type
     : INT
     | BOOL
     | STRING
+    | type '...'
     | type LSPAREN RSPAREN
     | name= ID;
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
-        LPAREN param (COMMA param)* RPAREN
+        LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
@@ -96,10 +100,19 @@ stmt
 
 expr
     : expr (AND | OR) expr
+    | LPAREN expr RPAREN
     | expr (MUL | DIV) expr
     | expr (ADD | MINUS) expr
     | expr LESS expr
     | NOT expr
+    | expr LSPAREN expr RSPAREN
+    | expr DOT LENGTH
+    | expr DOT ID LPAREN ( expr ( COMMA expr )* )? RPAREN
+    | NEW ID LPAREN (expr (COMMA expr)*)? RPAREN
+    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN
+    | NEW ID LSPAREN (expr (COMMA expr)*)? RSPAREN
+    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN
+    | LSPAREN (expr (COMMA expr)*)? RSPAREN
     | expr op= MUL expr //#BinaryExpr //
     | expr op= ADD expr //#BinaryExpr //
     | value=INTEGER //#IntegerLiteral //
