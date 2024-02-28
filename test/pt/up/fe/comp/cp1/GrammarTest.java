@@ -255,4 +255,30 @@ public class GrammarTest {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
     }
 
+    @Test
+    public void testComplexCode(){
+        TestUtils.parseVerbose("import test.alot.of.functions;\nimport test" +
+                ".file.test2;\nclass test{\n String getName(){\n  return value;\n }\n}", "program");
+    }
+
+    @Test
+    public void testParametersInClass(){
+        TestUtils.parseVerbose("class test{String getName(String test, int test2, bool test3){return test;}}", "program");
+    }
+
+    @Test
+    public void testInheritance(){
+        TestUtils.parseVerbose("class test extends test1{String getName(String test1, String test2){return test2;}}");
+    }
+
+    @Test
+    public void testDoubleWhile(){
+        TestUtils.parseVerbose("int aWhile(bool var1, bool var2){while(var1){while(var2){}} return 1;}", "methodDecl");
+    }
+
+    @Test
+    public void testIfElse(){
+        TestUtils.parseVerbose("int IfElseTest(bool var1, bool var2){if(var1){}else{}}", "methodDecl");
+    }
+
 }
