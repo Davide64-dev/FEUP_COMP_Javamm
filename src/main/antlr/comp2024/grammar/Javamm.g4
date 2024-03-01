@@ -60,7 +60,7 @@ program
     ;
 
 importDeclaration
-    : IMPORT ID ( DOT ID )* SEMI;
+    : IMPORT lib += ID ( DOT lib += ID )* SEMI;
 
 classDecl
     : CLASS name=ID (EXTENDS name=ID)?
