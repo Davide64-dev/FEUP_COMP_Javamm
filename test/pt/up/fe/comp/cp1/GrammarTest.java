@@ -46,12 +46,11 @@ public class GrammarTest {
         TestUtils.parseVerbose("class Foo {int a; int[] b; int c; boolean d; Bar e;}");
     }
 
-    /*
+
    @Test
     public void testVarDeclString() {
         TestUtils.parseVerbose("String aString;", "varDecl");
     }
-    */
 
     @Test
     public void testMainMethodEmpty() {
@@ -65,7 +64,6 @@ public class GrammarTest {
     }
 
     @Test
-    // TODO: multiple arguments missing
     public void testInstanceMethodVarargs() {
         TestUtils.parseVerbose("int foo(int... ints) {return 0;}",
                 INSTANCE_METHOD);
@@ -138,55 +136,46 @@ public class GrammarTest {
     }
 
     @Test
-    // TODO The error is we need to allow (Integer)
     public void testExprParen() {
         TestUtils.parseVerbose("(10)", EXPRESSION);
     }
 
     @Test
-    // TODO: not able to call a method
     public void testExprMemberCall() {
         TestUtils.parseVerbose("foo.bar(10, a, true)", EXPRESSION);
     }
 
     @Test
-    // TODO: not able to call a method
     public void testExprMemberCallChain() {
         TestUtils.parseVerbose("callee.level1().level2(false, 10).level3(true)", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to call length property
     public void testExprLength() {
         TestUtils.parseVerbose("a.length", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to call length property
     public void testExprLengthChain() {
         TestUtils.parseVerbose("a.length.length", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to access array
     public void testArrayAccess() {
         TestUtils.parseVerbose("a[10]", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to access array
     public void testArrayAccessChain() {
         TestUtils.parseVerbose("a[10][20]", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to access array
     public void testParenArrayChain() {
         TestUtils.parseVerbose("(a)[10]", EXPRESSION);
     }
 
     @Test
-    // TODO: Not able to access methods
     public void testCallArrayAccessLengthChain() {
         TestUtils.parseVerbose("callee.foo()[10].length", EXPRESSION);
     }
@@ -197,13 +186,11 @@ public class GrammarTest {
     }
 
     @Test
-    // TODO: Not accepting arrays and new keyword
     public void testExprNewArray() {
         TestUtils.parseVerbose("new int[!a]", EXPRESSION);
     }
 
     @Test
-    // TODO: Not accepting new keyword
     public void testExprNewClass() {
         TestUtils.parseVerbose("new Foo()", EXPRESSION);
     }
@@ -264,9 +251,34 @@ public class GrammarTest {
     }
 
     @Test
-    // TODO Not accepting Arrays
     public void testExprArrayInit() {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
+    }
+
+    @Test
+    public void testComplexCode(){
+        TestUtils.parseVerbose("import test.alot.of.functions;\nimport test" +
+                ".file.test2;\nclass test{\n String getName(){\n  return value;\n }\n}", "program");
+    }
+
+    @Test
+    public void testParametersInClass(){
+        TestUtils.parseVerbose("class test{String getName(String test, int test2, bool test3){return test;}}", "program");
+    }
+
+    @Test
+    public void testInheritance(){
+        TestUtils.parseVerbose("class test extends test1{String getName(String test1, String test2){return test2;}}");
+    }
+
+    @Test
+    public void testDoubleWhile(){
+        TestUtils.parseVerbose("int aWhile(bool var1, bool var2){while(var1){while(var2){}} return 1;}", "methodDecl");
+    }
+
+    @Test
+    public void testIfElse(){
+        TestUtils.parseVerbose("int IfElseTest(bool var1, bool var2){if(var1){}else{}}", "methodDecl");
     }
 
 }

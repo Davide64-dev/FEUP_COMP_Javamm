@@ -4,14 +4,8 @@ grammar Javamm;
     package pt.up.fe.comp2024;
 }
 
+// Operators
 EQUALS : '=';
-SEMI : ';' ;
-LCURLY : '{' ;
-RCURLY : '}' ;
-LPAREN : '(' ;
-RPAREN : ')' ;
-LSPAREN : '[';
-RSPAREN : ']';
 MUL : '*' ;
 ADD : '+' ;
 MINUS : '-';
@@ -20,30 +14,44 @@ AND : '&&';
 OR : '||';
 LESS : '<';
 NOT : '!';
-VOID : 'void';
-MAIN : 'main';
+
+// Utils
+SEMI : ';' ;
+LCURLY : '{' ;
+RCURLY : '}' ;
+LPAREN : '(' ;
+RPAREN : ')' ;
+LSPAREN : '[';
+RSPAREN : ']';
+DOT : '.';
 COMMA : ',';
-LENGTH : 'length';
+MULTIPLE: '...';
 
-
-CLASS : 'class' ;
+// Data types
 INT : 'int' ;
+TRUE: 'true';
+FALSE: 'false';
 BOOL : 'boolean';
-STRING : 'String';
+
+// Class Notation
+CLASS : 'class' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 IMPORT : 'import';
-DOT : '.';
 IF : 'if';
 ELSE : 'else';
 WHILE : 'while';
 EXTENDS : 'extends';
 STATIC : 'static';
 NEW : 'new';
+VOID : 'void';
+MAIN : 'main';
+LENGTH : 'length';
+THIS: 'this';
 
 
 INTEGER : [0-9]+ ;
-ID : [a-zA-Z]+[a-zA-Z0-9]* ;
+ID : [a-zA-Z_]+[a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -69,8 +77,6 @@ varDecl
 type
     : INT
     | BOOL
-    | STRING
-    | type '...'
     | type LSPAREN RSPAREN
     | name= ID;
 
@@ -79,6 +85,7 @@ methodDecl locals[boolean isPublic=false]
         type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
+    | mainMethod
     ;
 
 mainMethod
@@ -86,7 +93,7 @@ mainMethod
         varDecl* stmt* RCURLY;
 
 param
-    : type name=ID
+    : type (MULTIPLE)? name=ID
     ;
 
 stmt
@@ -94,30 +101,40 @@ stmt
     | IF LPAREN expr RPAREN stmt ELSE stmt
     | WHILE LPAREN expr RPAREN stmt
     | expr SEMI
-    | expr EQUALS expr SEMI // #AssignStmt //
-    | RETURN expr SEMI //#ReturnStmt
+    | expr EQUALS expr SEMI
+    | RETURN expr SEMI
     ;
 
+binaryOp
+    : AND
+    | OR
+    | MUL
+    | DIV
+    | ADD
+    | MINUS
+    | LESS;
+
+
+
 expr
-    : expr (AND | OR) expr
-    | LPAREN expr RPAREN
-    | expr (MUL | DIV) expr
-    | expr (ADD | MINUS) expr
-    | expr LESS expr
+    : LPAREN expr RPAREN
     | NOT expr
+    | expr binaryOp expr
     | expr LSPAREN expr RSPAREN
     | expr DOT LENGTH
     | expr DOT ID LPAREN ( expr ( COMMA expr )* )? RPAREN
-    | NEW ID LPAREN (expr (COMMA expr)*)? RPAREN
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN
-    | NEW ID LSPAREN (expr (COMMA expr)*)? RSPAREN
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN
     | LSPAREN (expr (COMMA expr)*)? RSPAREN
-    | expr op= MUL expr //#BinaryExpr //
-    | expr op= ADD expr //#BinaryExpr //
-    | value=INTEGER //#IntegerLiteral //
-    | name=ID //#VarRefExpr //
+    | INT
+    | TRUE
+    | FALSE
+    | value=INTEGER
+    | name=ID
+    | THIS
     ;
+
+
 
 
 
