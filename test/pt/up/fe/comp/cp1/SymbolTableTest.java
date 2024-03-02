@@ -66,7 +66,7 @@ public class SymbolTableTest {
                     break;
             }
         }
-        ;
+
         assertEquals("Field of type int", 1, checkInt);
         assertEquals("Field of type boolean", 1, checkBool);
         assertEquals("Field of type object", 1, checkObj);
