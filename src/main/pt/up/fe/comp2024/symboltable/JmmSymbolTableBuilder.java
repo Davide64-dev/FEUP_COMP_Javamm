@@ -43,10 +43,10 @@ public class JmmSymbolTableBuilder {
         List<Symbol> fields = new ArrayList<Symbol>();
 
         for (var var_declaration : var_declarations) {
-            String fieldType = var_declaration.getChild(0).get("type");
+            String fieldType = var_declaration.getChild(0).get("name");
             String fieldName = var_declaration.get("name");
 
-            Symbol field = new Symbol(new Type(fieldName, false), fieldName);
+            Symbol field = new Symbol(new Type(fieldType, false), fieldName);
             fields.add(field);
         }
 
