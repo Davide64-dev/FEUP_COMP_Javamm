@@ -65,7 +65,6 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
         Map<String, Type> map = new HashMap<>();
 
@@ -76,12 +75,8 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildParams(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
         Map<String, List<Symbol>> map = new HashMap<>();
-
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
-
         List<JmmNode> methods = classDecl.getChildren(METHOD_DECL);
 
         for (JmmNode method : methods){
@@ -90,7 +85,7 @@ public class JmmSymbolTableBuilder {
             List<JmmNode> paramNodes = method.getChildren(PARAM);
             for (JmmNode param : paramNodes){
                 var paramName = param.get("name");
-                var type = new Type(param.getChild(0).get("name"), false);
+                var type = new Type(param.getChild(0).get("name"), Boolean.parseBoolean(param.getChild(0).get("isArray")));
                 params.add(new Symbol(type, paramName));
             }
             map.put(methodName, params);
@@ -103,8 +98,6 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildLocals(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
-
         Map<String, List<Symbol>> map = new HashMap<>();
 
 
@@ -123,13 +116,16 @@ public class JmmSymbolTableBuilder {
 
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
+        var vars = new ArrayList<Symbol>();
+        List<JmmNode> varsDec = methodDecl.getChildren(VAR_DECL);
+        for (JmmNode variable : varsDec){
+            var variableName = variable.get("name");
+            var type = new Type(variable.getChild(0).get("name"), Boolean.parseBoolean(variable.getChild(0).get("isArray")));
+            vars.add(new Symbol(type, variableName));
+        }
 
-        return methodDecl.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(intType, varDecl.get("name")))
-                .toList();
+        return vars;
     }
 
 }
