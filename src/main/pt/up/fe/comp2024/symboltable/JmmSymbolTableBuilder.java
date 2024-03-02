@@ -9,8 +9,7 @@ import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.*;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
-import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
@@ -28,7 +27,13 @@ public class JmmSymbolTableBuilder {
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
-        var superClass = classDecl.get("superClass");
+
+        String superClass;
+        try {
+            superClass = classDecl.get("superClass");
+        } catch(NullPointerException e){
+            superClass = "";
+        }
 
         return new JmmSymbolTable(imports, className, superClass,methods, returnTypes, params, locals);
     }
@@ -50,7 +55,7 @@ public class JmmSymbolTableBuilder {
         Map<String, Type> map = new HashMap<>();
 
         classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), new Type(TypeUtils.getIntTypeName(), false)));
+                .forEach(method -> map.put(method.get("name"), new Type(method.getChild(0).get("name"), Boolean.parseBoolean(method.getChild(0).get("isArray")))));
 
         return map;
     }
@@ -62,8 +67,22 @@ public class JmmSymbolTableBuilder {
 
         var intType = new Type(TypeUtils.getIntTypeName(), false);
 
-        classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), Arrays.asList(new Symbol(intType, method.getJmmChild(1).get("name")))));
+        List<JmmNode> methods = classDecl.getChildren(METHOD_DECL);
+
+        for (JmmNode method : methods){
+            var methodName = method.get("name");
+            var params = new ArrayList<Symbol>();
+            List<JmmNode> paramNodes = method.getChildren(PARAM);
+            for (JmmNode param : paramNodes){
+                var paramName = param.get("name");
+                var type = new Type(param.getChild(0).get("name"), false);
+                params.add(new Symbol(type, paramName));
+            }
+            map.put(methodName, params);
+
+
+        }
+
 
         return map;
     }

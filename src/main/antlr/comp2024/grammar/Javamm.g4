@@ -74,23 +74,26 @@ varDecl
     : type name=ID SEMI
     ;
 
-type
-    : INT
-    | BOOL
-    | type LSPAREN RSPAREN
-    | name= ID;
+type locals[boolean isArray=false]
+    : name=INT
+    | name=BOOL
+    | name= ID
+    | name = VOID
+    | name=INT LSPAREN RSPAREN {$isArray=true;}
+    | name=BOOL LSPAREN RSPAREN {$isArray=true;}
+    | name=ID LSPAREN RSPAREN {$isArray=true;};
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
-    | mainMethod
-    ;
+    | (PUBLIC {$isPublic=true;})? STATIC type name=MAIN LPAREN param* RPAREN LCURLY
+              varDecl* stmt* RCURLY;
 
-mainMethod
-    : STATIC VOID name=MAIN LPAREN param* RPAREN LCURLY
-        varDecl* stmt* RCURLY;
+mainMethod locals[boolean isPublic=false]
+    : (PUBLIC {$isPublic=true;})? STATIC type name=MAIN LPAREN param* RPAREN LCURLY
+                    varDecl* stmt* RCURLY;
 
 param
     : type (MULTIPLE)? name=ID
