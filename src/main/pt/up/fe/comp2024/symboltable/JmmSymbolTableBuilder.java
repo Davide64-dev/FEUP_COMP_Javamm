@@ -28,8 +28,9 @@ public class JmmSymbolTableBuilder {
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
+        var superClass = classDecl.get("superClass");
 
-        return new JmmSymbolTable(imports, className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(imports, className, superClass,methods, returnTypes, params, locals);
     }
 
     private static List<String> buildImports(JmmNode root){

@@ -14,6 +14,8 @@ public class JmmSymbolTable implements SymbolTable {
 
     private final List<String> imports;
     private final String className;
+
+    private final String superClass;
     private final List<String> methods;
     private final Map<String, Type> returnTypes;
     private final Map<String, List<Symbol>> params;
@@ -21,11 +23,13 @@ public class JmmSymbolTable implements SymbolTable {
 
     public JmmSymbolTable(List<String> imports,
                           String className,
+                          String superClass,
                           List<String> methods,
                           Map<String, Type> returnTypes,
                           Map<String, List<Symbol>> params,
                           Map<String, List<Symbol>> locals) {
         this.imports = imports;
+        this.superClass = superClass;
         this.className = className;
         this.methods = methods;
         this.returnTypes = returnTypes;
@@ -45,7 +49,7 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public String getSuper() {
-        throw new NotImplementedException();
+        return superClass;
     }
 
     @Override

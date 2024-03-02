@@ -63,7 +63,7 @@ importDeclaration
     : IMPORT lib += ID ( DOT lib += ID )* SEMI;
 
 classDecl
-    : CLASS name=ID (EXTENDS name=ID)?
+    : CLASS name=ID (EXTENDS superClass=ID)?
         LCURLY
         varDecl*
         methodDecl*
