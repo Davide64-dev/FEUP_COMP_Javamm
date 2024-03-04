@@ -55,6 +55,8 @@ ID : [a-zA-Z_]+[a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
+SINGLE_LINE_COM : '//' .* '\n' -> skip ;
+
 program
     : importDeclaration* classDecl EOF
     ;
