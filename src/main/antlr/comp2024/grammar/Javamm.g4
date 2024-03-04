@@ -75,7 +75,7 @@ classDecl
     ;
 
 varDecl
-    : type name=ID SEMI
+    : type name=(MAIN | ID) SEMI
     ;
 
 type locals[boolean isArray=false]
