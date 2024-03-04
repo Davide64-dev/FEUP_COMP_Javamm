@@ -50,12 +50,14 @@ LENGTH : 'length';
 THIS: 'this';
 
 
-INTEGER : [0-9]+ ;
+INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_]+[a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
-SINGLE_LINE_COM : '//' .* '\n' -> skip ;
+SINGLE_LINE_COM : '//' .*? '\n' -> skip ;
+
+MULTI_LINE_COM: '/*' .*? '*/' -> skip;
 
 program
     : importDeclaration* classDecl EOF
@@ -94,7 +96,7 @@ methodDecl locals[boolean isPublic=false]
               varDecl* stmt* RCURLY;
 
 mainMethod locals[boolean isPublic=false]
-    : (PUBLIC {$isPublic=true;})? STATIC type name=MAIN LPAREN param* RPAREN LCURLY
+    : (PUBLIC {$isPublic=true;})? STATIC VOID name=MAIN LPAREN param* RPAREN LCURLY
                     varDecl* stmt* RCURLY;
 
 param
