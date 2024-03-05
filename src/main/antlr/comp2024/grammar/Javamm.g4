@@ -95,9 +95,6 @@ methodDecl locals[boolean isPublic=false]
     | (PUBLIC {$isPublic=true;})? STATIC type name=MAIN LPAREN param* RPAREN LCURLY
               varDecl* stmt* RCURLY;
 
-mainMethod locals[boolean isPublic=false]
-    : (PUBLIC {$isPublic=true;})? STATIC VOID name=MAIN LPAREN param* RPAREN LCURLY
-                    varDecl* stmt* RCURLY;
 
 param
     : type (MULTIPLE)? name=ID
