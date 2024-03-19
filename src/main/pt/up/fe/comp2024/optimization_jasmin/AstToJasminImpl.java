@@ -12,8 +12,8 @@ public class AstToJasminImpl implements AstToJasmin {
 
         var generator = new JasminGeneratorVisitor(semanticsResult.getSymbolTable());
         var code = generator.visit(semanticsResult.getRootNode());
-
-        return new JasminResult(semanticsResult, code, Collections.emptyList());
+        return null;
+        //return new JasminResult(semanticsResult, code, Collections.emptyList());
     }
 
     @Override

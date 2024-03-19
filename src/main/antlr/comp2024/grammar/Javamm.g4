@@ -118,7 +118,8 @@ binaryOp
     | MINUS
     | LESS;
 
-
+varRefExpr
+    : name=ID;
 
 expr
     : LPAREN expr RPAREN
@@ -130,12 +131,11 @@ expr
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN
     | LSPAREN (expr (COMMA expr)*)? RSPAREN
-    | INT
     | TRUE
     | FALSE
-    | value=INTEGER
-    | name=ID
+    | varRefExpr
     | THIS
+    | INTEGER
     ;
 
 
