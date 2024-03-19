@@ -118,24 +118,22 @@ binaryOp
     | MINUS
     | LESS;
 
-varRefExpr
-    : name=ID;
 
 expr
-    : LPAREN expr RPAREN
-    | NOT expr
-    | expr binaryOp expr
-    | expr LSPAREN expr RSPAREN
-    | expr DOT LENGTH
-    | expr DOT ID LPAREN ( expr ( COMMA expr )* )? RPAREN
-    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN
-    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN
-    | LSPAREN (expr (COMMA expr)*)? RSPAREN
-    | TRUE
-    | FALSE
-    | varRefExpr
-    | THIS
-    | INTEGER
+    : LPAREN expr RPAREN #parantheses
+    | NOT expr #notOp
+    | expr binaryOp expr #binaryOperation
+    | expr LSPAREN expr RSPAREN #arrayAccess
+    | expr DOT LENGTH #objectVar
+    | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
+    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newArrau
+    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newObjetc
+    | LSPAREN (expr (COMMA expr)*)? RSPAREN #square
+    | TRUE #true
+    | FALSE #false
+    | name=ID #varRefExpr
+    | THIS #this
+    | INTEGER #integer
     ;
 
 

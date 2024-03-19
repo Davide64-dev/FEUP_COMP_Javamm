@@ -35,14 +35,12 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
 
-        System.out.println("Function Called!");
+        System.out.println("Variable Found!");
 
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var varRefName = varRefExpr.get("name");
-
-
 
         // Var is a field, return
         if (table.getFields().stream()
@@ -81,19 +79,4 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         return null;
     }
-
-    /*
-    @Override
-    public List<Report> analyze(JmmNode root, SymbolTable table) {
-        List<JmmNode> methods = root.getDescendants();
-        System.out.println(methods);
-        visitVarRefExpr(root, table);
-
-        // Return reports
-        return getReports();
-    }
-
-     */
-
-
 }
