@@ -110,19 +110,18 @@ stmt
     ;
 
 binaryOp
-    : AND
-    | OR
-    | MUL
-    | DIV
-    | ADD
-    | MINUS
-    | LESS;
-
+    : name=AND
+    | name=OR
+    | name=MUL
+    | name=DIV
+    | name=ADD
+    | name=MINUS
+    | name=LESS;
 
 expr
     : LPAREN expr RPAREN #parantheses
     | NOT expr #notOp
-    | expr binaryOp expr #binaryOperation
+    | expr binaryOp expr #binaryExpr
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
