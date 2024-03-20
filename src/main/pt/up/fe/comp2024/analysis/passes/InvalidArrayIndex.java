@@ -45,6 +45,7 @@ public class InvalidArrayIndex extends AnalysisVisitor {
         if (arrayAccess.getKind().toString().equals("const")){
             if (arrayAccess.get("name") != "true" && arrayAccess.get("name") != "false"){
                 // It is a constant. It is valid;
+                return null;
             }
         }
 
