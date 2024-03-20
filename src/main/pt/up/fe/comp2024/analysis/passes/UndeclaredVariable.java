@@ -68,7 +68,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
         var message = String.format("Variable '%s' does not exist.", varRefName);
 
 
-        System.out.println("Hello World");
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(varRefExpr),

@@ -50,7 +50,7 @@ LENGTH : 'length';
 THIS: 'this';
 
 
-INTEGER : '0' | [1-9][0-9]* ;
+INTEGER : '0' | [1-9][0-9]*;
 ID : [$a-zA-Z_]+[a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
@@ -125,14 +125,14 @@ expr
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
-    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newArrau
-    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newObjetc
+    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newArray
+    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newObject
     | LSPAREN (expr (COMMA expr)*)? RSPAREN #square
-    | TRUE #true
-    | FALSE #false
+    | name=TRUE #const
+    | name=FALSE #const
     | name=ID #varRefExpr
-    | THIS #this
-    | INTEGER #integer
+    | name=THIS #this
+    | name=INTEGER #const
     ;
 
 

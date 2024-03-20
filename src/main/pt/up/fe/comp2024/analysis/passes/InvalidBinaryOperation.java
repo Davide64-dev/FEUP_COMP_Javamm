@@ -18,7 +18,7 @@ import java.util.List;
 
 public class InvalidBinaryOperation extends AnalysisVisitor {
 
-    public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+");
+    public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+", "<");
 
     public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||");
     private String currentMethod;
@@ -45,11 +45,12 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         var rightOperand = binaryRefExpr.getChild(2);
 
 
+        // Check if the left side is a node that return an integer
         if (ARITHMETIC_OPERATORS.contains(operator.get("name"))){
             System.out.println("Arithmetic Operation");
             System.out.println(leftOperand);
-            // TODO: Need to check if it is a variable, a method or a const. Otherwise ignore.
-            if (getVariableType(leftOperand, table).getName().equals("int") && !getVariableType(leftOperand, table).isArray()){
+            if ((getVariableType(leftOperand, table).getName().equals("int") &&
+                    !getVariableType(leftOperand, table).isArray())){
                 System.out.println("Left Operand is an Integer");
 
                 if (getVariableType(rightOperand, table).equals("int") && !getVariableType(leftOperand, table).isArray()){
@@ -59,8 +60,11 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
             }
         }
 
+
+        // Check if the left side is also a Boolean
         else if (BOOLEAN_OPERATORS.contains(operator.get("name"))){
             System.out.print("Boolean Operation");
+            System.out.println(rightOperand);
             if (getVariableType(leftOperand, table).getName().equals("boolean")){
                 System.out.println("Left Operand is a Boolean");
 
@@ -70,7 +74,6 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
                 }
             }
         }
-
 
         // Create error report
         System.out.println("There was an error");
@@ -100,11 +103,22 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
 
             if (table.getFields().stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-                return null;
+
+                for (var symbol : table.getFields()){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
             }
 
             if (table.getParameters(currentMethod).stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
+
+                for (var symbol : table.getParameters(currentMethod)){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
                 return null;
             }
 
@@ -121,6 +135,17 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
             }
 
         }
+
+        // If the value is const
+        if (variable.getKind().equals(Kind.CONST.toString())){
+            if (variable.get("name").equals("true") || variable.get("name").equals("false")){
+                return new Type("boolean", false);
+            }
+            else{
+                return new Type("int", false);
+            }
+        }
+
         return null;
     }
 }
