@@ -7,15 +7,14 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class InvalidArrayAccess extends AnalysisVisitor {
+public class InvalidArrayIndex extends AnalysisVisitor {
 
-    private String currentMethod;
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+");
+    private String currentMethod;
 
     @Override
     public void buildVisitor() {
@@ -35,35 +34,47 @@ public class InvalidArrayAccess extends AnalysisVisitor {
         //SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
-        var arrayNode = arrayExpr.getChild(0);
 
         var arrayAccess = arrayExpr.getChild(1);
 
+        if(ARITHMETIC_OPERATORS.contains(arrayAccess.getKind().toString())){
+            // It's an arithmetic operation. Already validated as true;
+            return null;
+        }
+
+        if (arrayAccess.getKind().toString().equals("const")){
+            if (arrayAccess.get("name") != "true" && arrayAccess.get("name") != "false"){
+                // It is a constant. It is valid;
+            }
+        }
+
+
+        // Check if the variable is an integer variable
         for (var param : table.getFields()){
-            if (param.getName().equals(arrayNode.get("name"))){
-                if (param.getType().isArray()){
+            if (param.getName().equals(arrayAccess.get("name"))){
+                if (param.getType().getName().equals("int")){
                     return null;
                 }
             }
         }
 
         for (var param : table.getParameters(currentMethod)){
-            if (param.getName().equals(arrayNode.get("name"))) {
-                if (param.getType().isArray()) {
+            if (param.getName().equals(arrayAccess.get("name"))) {
+                if (param.getType().getName().equals("int")) {
                     return null;
                 }
             }
         }
 
         for (var param : table.getLocalVariables(currentMethod)){
-            if (param.getName().equals(arrayNode.get("name"))) {
-                if (param.getType().isArray()) {
+            if (param.getName().equals(arrayAccess.get("name"))) {
+                if (param.getType().getName().equals("int")) {
                     return null;
                 }
             }
         }
 
-        var message = String.format("'%s' is not an array", arrayNode.get("name"));
+        var message = String.format("'%s' is not a valid array access", arrayAccess.get("name"));
 
 
         addReport(Report.newError(

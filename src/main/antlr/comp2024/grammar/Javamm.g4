@@ -101,12 +101,12 @@ param
     ;
 
 stmt
-    : LCURLY ( stmt )* RCURLY
-    | IF LPAREN expr RPAREN stmt ELSE stmt
-    | WHILE LPAREN expr RPAREN stmt
-    | expr SEMI
-    | expr EQUALS expr SEMI
-    | RETURN expr SEMI
+    : LCURLY ( stmt )* RCURLY #parStmt
+    | IF LPAREN expr RPAREN stmt ELSE stmt #ifStmt
+    | WHILE LPAREN expr RPAREN stmt #whileStmt
+    | expr SEMI #expression
+    | expr EQUALS expr SEMI #assignStmt
+    | RETURN expr SEMI #retStmt
     ;
 
 binaryOp
