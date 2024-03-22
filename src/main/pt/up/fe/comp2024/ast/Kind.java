@@ -20,7 +20,10 @@ public enum Kind {
     VAR_REF_EXPR,
     METHOD_CALL,
     CONST,
-    ARRAY_ACCESS;
+    ARRAY_ACCESS,
+    WHILE_STMT,
+    IF_STMT,
+    THIS;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
