@@ -45,7 +45,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         var rightOperand = binaryRefExpr.getChild(2);
 
 
-        // Check if the left side is a node that return an integer
+        // Check if the operands are nodes that return an integer
         if (ARITHMETIC_OPERATORS.contains(operator.get("name"))){
             System.out.println("Arithmetic Operation");
             System.out.println(leftOperand);
@@ -61,7 +61,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         }
 
 
-        // Check if the left side is also a Boolean
+        // Check if the operands are both Boolean
         else if (BOOLEAN_OPERATORS.contains(operator.get("name"))){
             System.out.print("Boolean Operation");
             System.out.println(rightOperand);
@@ -143,6 +143,30 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
             }
             else{
                 return new Type("int", false);
+            }
+        }
+
+        // If the value is another node
+        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
+            var operator = variable.getChild(1);
+            if (ARITHMETIC_OPERATORS.contains(operator.get("name")) && !operator.get("name").equals("<")){
+                return new Type("int", false);
+            }
+
+            else{
+                return new Type("boolean", false);
+            }
+
+        }
+
+        // If the variable is a function
+        if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
+            List<Symbol> methods =table.getFields();
+
+            for (var method : methods){
+                if (method.equals(variable.get("name"))){
+                    return table.getReturnType(method.getName());
+                }
             }
         }
 
