@@ -53,7 +53,8 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
                     !getVariableType(leftOperand, table).isArray())){
                 System.out.println("Left Operand is an Integer");
 
-                if (getVariableType(rightOperand, table).equals("int") && !getVariableType(leftOperand, table).isArray()){
+                if (getVariableType(rightOperand, table).equals("int") &&
+                        !getVariableType(leftOperand, table).isArray()){
                     System.out.print("Right Operand is an Integer");
                     return null;
                 }

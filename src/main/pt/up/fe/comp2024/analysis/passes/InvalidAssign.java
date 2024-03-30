@@ -12,15 +12,17 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import java.util.Arrays;
 import java.util.List;
 
-public class InvalidArrayIndex extends AnalysisVisitor {
+public class InvalidAssign extends AnalysisVisitor {
 
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+");
+
+    public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("||", "&&", "<", "!");
     private String currentMethod;
 
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
+        addVisit(Kind.ARRAY_ACCESS, this::assignAccess);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -28,15 +30,11 @@ public class InvalidArrayIndex extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitArrayAccess(JmmNode arrayExpr, SymbolTable table) {
+    private Void assignAccess(JmmNode assignExpr, SymbolTable table) {
 
         System.out.println("Array Access Found");
 
-        //SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-
-        // Check if exists a parameter or variable declaration with the same name as the variable reference
-
-        var arrayAccess = arrayExpr.getChild(1);
+        var arrayAccess = assignExpr.getChild(1);
 
         if(ARITHMETIC_OPERATORS.contains(arrayAccess.getKind().toString())){
             // It's an arithmetic operation. Already validated as true;
@@ -77,11 +75,11 @@ public class InvalidArrayIndex extends AnalysisVisitor {
         }
 
 
-        if (arrayExpr.getKind().equals(Kind.METHOD_CALL.toString())){
+        if (assignExpr.getKind().equals(Kind.METHOD_CALL.toString())){
             List<Symbol> methods =table.getFields();
 
             for (var method : methods){
-                if (method.equals(arrayExpr.get("name"))){
+                if (method.equals(assignExpr.get("name"))){
                     var returnType = table.getReturnType(method.getName());
                     if (!returnType.isArray() && returnType.getName().equals("int")){
                         return null;
@@ -95,8 +93,8 @@ public class InvalidArrayIndex extends AnalysisVisitor {
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
-                NodeUtils.getLine(arrayExpr),
-                NodeUtils.getColumn(arrayExpr),
+                NodeUtils.getLine(assignExpr),
+                NodeUtils.getColumn(assignExpr),
                 message,
                 null)
         );

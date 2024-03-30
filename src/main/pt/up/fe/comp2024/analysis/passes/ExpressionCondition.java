@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -8,6 +9,8 @@ import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
+
+import java.util.List;
 
 public class ExpressionCondition  extends AnalysisVisitor {
 
@@ -27,19 +30,23 @@ public class ExpressionCondition  extends AnalysisVisitor {
 
     private Void visitCondition(JmmNode stmt, SymbolTable table) {
 
-        System.out.println("Variable Found!");
+        System.out.println("Condition Found!");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var condition = stmt.getChild(0);
 
-        if (condition.getKind().equals(Kind.CONST)){
+        System.out.println(condition);
+
+        // If it is a constant - Must be true or false
+        if (condition.getKind().equals(Kind.CONST.toString())){
             if (condition.get("name").equals("true") || condition.get("name").equals("false")){
                 // Condition is a constant, return
                 return null;
             }
         }
 
-        if (condition.getKind().equals(Kind.BINARY_EXPR)){
+        // If it is a binary expression, it must be < && or ||
+        if (condition.getKind().equals(Kind.BINARY_EXPR.toString())){
             if (condition.getChild(1).get("name").equals("<") ||
                     condition.getChild(1).get("name").equals("&&") ||
                     condition.getChild(1).get("name").equals("||")){
@@ -48,31 +55,39 @@ public class ExpressionCondition  extends AnalysisVisitor {
             }
         }
 
-        // Also need to check if it is a function call
+        // If it is a variable
+        if (condition.getKind().equals(Kind.VAR_REF_EXPR.toString())){
+                for (var symbol : table.getFields()){
+                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                            && !symbol.getType().isArray()){
+                        return null;
+                    }
+                }
 
-        /*
-        // Var is a field, return
-        if (table.getFields().stream()
-                .anyMatch(param -> param.getName().equals(condition))) {
-            System.out.println("Var is a field, return");
-            return null;
+                for (var symbol : table.getParameters(currentMethod)){
+                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                            && !symbol.getType().isArray()){
+                        return null;
+                    }
+                }
+
+                for (var symbol : table.getLocalVariables(currentMethod)){
+                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                            && !symbol.getType().isArray()){
+                        return null;
+                    }
+                }
         }
 
-        // Var is a parameter, return
-        if (table.getParameters(currentMethod).stream()
-                .anyMatch(param -> param.getName().equals(varRefName))) {
-            System.out.println("Var is a parameter, return");
-            return null;
-        }
+        if (condition.getKind().equals(Kind.METHOD_CALL.toString())){
 
-        // Var is a declared variable, return
-        if (table.getLocalVariables(currentMethod).stream()
-                .anyMatch(varDecl -> varDecl.getName().equals(varRefName))) {
-            System.out.println("Var is a variable, return");
-            return null;
+            for (var method : table.getFields()){
+                if (method.equals(condition.get("name")) && method.getType().getName().equals("boolean")
+                            && !method.getType().isArray()){
+                    return null;
+                }
+            }
         }
-        */
-
 
         // Create error report
         System.out.println("There was an error");
