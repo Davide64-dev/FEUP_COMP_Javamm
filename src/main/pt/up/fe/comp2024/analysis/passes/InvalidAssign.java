@@ -2,6 +2,7 @@ package pt.up.fe.comp2024.analysis.passes;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -22,7 +23,7 @@ public class InvalidAssign extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.ARRAY_ACCESS, this::assignAccess);
+        addVisit(Kind.ASSIGN_STMT, this::assignVariable);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -30,65 +31,43 @@ public class InvalidAssign extends AnalysisVisitor {
         return null;
     }
 
-    private Void assignAccess(JmmNode assignExpr, SymbolTable table) {
+    private Void assignVariable(JmmNode assignExpr, SymbolTable table) {
 
-        System.out.println("Array Access Found");
+        System.out.println("Variable Assign found!");
 
-        var arrayAccess = assignExpr.getChild(1);
+        var assigned = assignExpr.getChild(0);
+        var assignee = assignExpr.getChild(1);
 
-        if(ARITHMETIC_OPERATORS.contains(arrayAccess.getKind().toString())){
-            // It's an arithmetic operation. Already validated as true;
+        if (!assigned.getKind().equals(Kind.VAR_REF_EXPR.toString())){
+            var message = String.format("'%s' is not a variable", assigned.get("name"));
+
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignExpr),
+                    NodeUtils.getColumn(assignExpr),
+                    message,
+                    null)
+            );
             return null;
         }
 
-        if (arrayAccess.getKind().toString().equals("const")){
-            if (arrayAccess.get("name") != "true" && arrayAccess.get("name") != "false"){
-                // It is a constant. It is valid;
-                return null;
-            }
+        if (getVariableType(assigned, table, currentMethod).getName().equals(getVariableType(assignee, table, currentMethod).getName())
+                && getVariableType(assigned, table, currentMethod).isArray() == getVariableType(assignee, table, currentMethod).isArray()){
+            // Same type
+            return null;
+        }
+
+        Type assignedType = getVariableType(assigned, table, currentMethod);
+        Type assigneeType = getVariableType(assignee, table, currentMethod);
+
+        // It cannot be an integer or boolean - it's wrong. But if are both objects and imported, assume correct
+        if (assignedType.getName().isEmpty() && assigneeType.getName().isEmpty()) {
+            System.out.println("Both objects");
+            return null;
         }
 
 
-        // Check if the variable is an integer variable
-        for (var param : table.getFields()){
-            if (param.getName().equals(arrayAccess.get("name"))){
-                if (param.getType().getName().equals("int") && !param.getType().isArray()){
-                    return null;
-                }
-            }
-        }
-
-        for (var param : table.getParameters(currentMethod)){
-            if (param.getName().equals(arrayAccess.get("name"))) {
-                if (param.getType().getName().equals("int") && !param.getType().isArray()) {
-                    return null;
-                }
-            }
-        }
-
-        for (var param : table.getLocalVariables(currentMethod)){
-            if (param.getName().equals(arrayAccess.get("name"))) {
-                if (param.getType().getName().equals("int") && !param.getType().isArray()) {
-                    return null;
-                }
-            }
-        }
-
-
-        if (assignExpr.getKind().equals(Kind.METHOD_CALL.toString())){
-            List<Symbol> methods =table.getFields();
-
-            for (var method : methods){
-                if (method.equals(assignExpr.get("name"))){
-                    var returnType = table.getReturnType(method.getName());
-                    if (!returnType.isArray() && returnType.getName().equals("int")){
-                        return null;
-                    }
-                }
-            }
-        }
-
-        var message = String.format("'%s' is not a valid array access", arrayAccess.get("name"));
+        var message = String.format("'%s' type do not correspond to '%s' type", assigned.get("name"), assignee.get("name"));
 
 
         addReport(Report.newError(
@@ -98,6 +77,8 @@ public class InvalidAssign extends AnalysisVisitor {
                 message,
                 null)
         );
+
+
 
         return null;
     }

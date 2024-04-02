@@ -82,7 +82,7 @@ public class ExpressionCondition  extends AnalysisVisitor {
         if (condition.getKind().equals(Kind.METHOD_CALL.toString())){
 
             for (var method : table.getFields()){
-                if (method.equals(condition.get("name")) && method.getType().getName().equals("boolean")
+                if (method.getName().equals(condition.get("name")) && method.getType().getName().equals("boolean")
                             && !method.getType().isArray()){
                     return null;
                 }

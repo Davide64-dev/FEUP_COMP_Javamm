@@ -125,8 +125,8 @@ expr
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
-    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newArray
-    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newObject
+    | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
+    | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newArray
     | LSPAREN (expr (COMMA expr)*)? RSPAREN #square
     | name=TRUE #const
     | name=FALSE #const

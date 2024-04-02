@@ -18,9 +18,6 @@ import java.util.List;
 
 public class InvalidBinaryOperation extends AnalysisVisitor {
 
-    public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+", "<");
-
-    public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||");
     private String currentMethod;
 
     @Override
@@ -49,12 +46,12 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         if (ARITHMETIC_OPERATORS.contains(operator.get("name"))){
             System.out.println("Arithmetic Operation");
             System.out.println(leftOperand);
-            if ((getVariableType(leftOperand, table).getName().equals("int") &&
-                    !getVariableType(leftOperand, table).isArray())){
+            if ((getVariableType(leftOperand, table, currentMethod).getName().equals("int") &&
+                    !getVariableType(leftOperand, table, currentMethod).isArray())){
                 System.out.println("Left Operand is an Integer");
 
-                if (getVariableType(rightOperand, table).equals("int") &&
-                        !getVariableType(leftOperand, table).isArray()){
+                if (getVariableType(rightOperand, table, currentMethod).equals("int") &&
+                        !getVariableType(leftOperand, table, currentMethod).isArray()){
                     System.out.print("Right Operand is an Integer");
                     return null;
                 }
@@ -66,10 +63,10 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         else if (BOOLEAN_OPERATORS.contains(operator.get("name"))){
             System.out.print("Boolean Operation");
             System.out.println(rightOperand);
-            if (getVariableType(leftOperand, table).getName().equals("boolean")){
+            if (getVariableType(leftOperand, table, currentMethod).getName().equals("boolean")){
                 System.out.println("Left Operand is a Boolean");
 
-                if (getVariableType(rightOperand, table).equals("boolean")){
+                if (getVariableType(rightOperand, table, currentMethod).equals("boolean")){
                     System.out.print("Right Operand is a Boolean");
                     return null;
                 }
@@ -94,84 +91,6 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         return null;
 
 
-    }
-
-    private Type getVariableType(JmmNode variable, SymbolTable table){
-        System.out.println("Arithmetic Operation");
-
-        // If the value is a variable
-        if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
-
-            if (table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-
-                for (var symbol : table.getFields()){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-            }
-
-            if (table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-
-                for (var symbol : table.getParameters(currentMethod)){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-                return null;
-            }
-
-            if (table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(variable.get("name")))) {
-
-                List<Symbol> symbols =table.getLocalVariables(currentMethod);
-
-                for (var symbol : symbols){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-            }
-
-        }
-
-        // If the value is const
-        if (variable.getKind().equals(Kind.CONST.toString())){
-            if (variable.get("name").equals("true") || variable.get("name").equals("false")){
-                return new Type("boolean", false);
-            }
-            else{
-                return new Type("int", false);
-            }
-        }
-
-        // If the value is another node
-        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
-            var operator = variable.getChild(1);
-            if (ARITHMETIC_OPERATORS.contains(operator.get("name")) && !operator.get("name").equals("<")){
-                return new Type("int", false);
-            }
-
-            else{
-                return new Type("boolean", false);
-            }
-
-        }
-
-        // If the variable is a function
-        if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
-            List<Symbol> methods =table.getFields();
-
-            for (var method : methods){
-                if (method.equals(variable.get("name"))){
-                    return table.getReturnType(method.getName());
-                }
-            }
-        }
-
-        return null;
     }
 }
 

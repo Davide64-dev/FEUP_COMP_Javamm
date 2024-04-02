@@ -26,7 +26,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new InvalidArrayAccess(),
                 new InvalidArrayIndex(),
                 new ExpressionCondition(),
-                new StaticMethods());
+                new StaticMethods(),
+                new InvalidAssign(),
+                new InvalidThis()
+                );
 
     }
 
