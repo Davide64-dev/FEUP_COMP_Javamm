@@ -127,7 +127,7 @@ expr
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newArray
-    | LSPAREN (expr (COMMA expr)*)? RSPAREN #square
+    | LSPAREN (expr (COMMA expr)*)? RSPAREN #arrayCall
     | name=TRUE #const
     | name=FALSE #const
     | name=ID #varRefExpr
