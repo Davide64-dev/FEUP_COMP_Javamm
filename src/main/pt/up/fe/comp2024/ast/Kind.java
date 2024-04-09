@@ -23,7 +23,8 @@ public enum Kind {
     ARRAY_ACCESS,
     WHILE_STMT,
     IF_STMT,
-    THIS;
+    THIS,
+    IMPORT_DECLARATION;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);

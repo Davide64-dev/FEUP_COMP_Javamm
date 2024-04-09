@@ -41,8 +41,46 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(IMPORT_DECLARATION, this::visitImpDecl);
+        addVisit(VAR_DECL, this::visitVarDecl);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+
+    private String visitImpDecl(JmmNode node, Void s) { //Imports
+        StringBuilder importStmt = new StringBuilder();
+
+        for (var importID : table.getImports()) {
+            if (importID.contains(node.get("ID"))) {
+                importStmt.append("import ");
+                importStmt.append(importID);
+                importStmt.append('\n');
+            }
+        }
+
+        return importStmt.toString();
+    }
+
+    private String visitVarDecl(JmmNode node, Void s) {
+        StringBuilder code = new StringBuilder(".field ");
+// on the tree doesnt have attribute ig it is public
+//        boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+//
+//        if (isPublic) {
+//            code.append("public ");
+//        }
+
+        // name
+        var name = node.get("name");
+        code.append(name);
+
+        // type
+        var retType = OptUtils.toOllirType(node.getJmmChild(0));
+        code.append(retType);
+        code.append(NL);
+
+        return code.toString();
     }
 
 
@@ -131,7 +169,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // param
         var paramCode = visit(node.getJmmChild(1));
-        code.append("(" + paramCode + ")");
+        code.append("(").append(paramCode).append(")");
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
@@ -159,6 +197,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
+        //For Super Class
+        var superClass = table.getSuper();
+        if (!superClass.isEmpty()) {
+            code.append(" extends ").append(superClass);
+        }
         code.append(L_BRACKET);
 
         code.append(NL);
@@ -177,6 +220,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(buildConstructor());
         code.append(R_BRACKET);
+
 
         return code.toString();
     }
