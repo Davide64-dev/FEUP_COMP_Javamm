@@ -49,6 +49,8 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
+        generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
     }
 
     public List<Report> getReports() {
@@ -120,7 +122,7 @@ public class JasminGenerator {
             case BOOLEAN -> "Z";
             case VOID -> "V";
             case CLASS -> "L" + ollirType.toString() + ";";
-            // case ARRAYREF -> "[" + ... to be implemented
+            // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
     }
@@ -210,6 +212,14 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String generatePutFieldInstruction(PutFieldInstruction putFieldInstruction) {
+        return null;
+    }
+
+    private String generateGetFieldInstruction(GetFieldInstruction getFieldInstruction) {
+        return null;
+    }
+
     private String generateSingleOp(SingleOpInstruction singleOp) {
         return generators.apply(singleOp.getSingleOperand());
     }
@@ -246,14 +256,18 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // I really don't know if there's a better way to compare types that
-        // doesn't involve converting to string
-        if (currentMethod.getReturnType().toString().equals("VOID")) {
-            code.append("return").append(NL);
-        } else {
-            // TODO: also still missing other return types for now!
-            code.append(generators.apply(returnInst.getOperand()));
-            code.append("ireturn").append(NL);
+        // TODO: not sure if all types are correct/covered
+        switch(currentMethod.getReturnType().getTypeOfElement()) {
+            case VOID:
+                code.append("return").append(NL);
+                break;
+            case OBJECTREF:
+                code.append(generators.apply(returnInst.getOperand()));
+                code.append("areturn").append(NL);
+            default:
+                code.append(generators.apply(returnInst.getOperand()));
+                code.append("ireturn").append(NL);
+                break;
         }
 
         return code.toString();
