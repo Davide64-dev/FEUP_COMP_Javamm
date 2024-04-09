@@ -112,11 +112,11 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
 
         // If the variable is a function
         if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
-            List<Symbol> methods =table.getFields();
+            var methods =table.getMethods();
 
             for (var method : methods){
-                if (method.getName().equals(variable.get("name"))){
-                    return table.getReturnType(method.getName());
+                if (method.equals(variable.get("name"))){
+                    return table.getReturnType(method);
                 }
             }
         }

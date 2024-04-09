@@ -43,7 +43,8 @@ public class InvalidArrayIndex extends AnalysisVisitor {
             return null;
         }
 
-        if (arrayAccess.getKind().toString().equals("const")){
+        var debug = arrayAccess.getKind().toString();
+        if (arrayAccess.getKind().toString().equals("Const")){
             if (arrayAccess.get("name") != "true" && arrayAccess.get("name") != "false"){
                 // It is a constant. It is valid;
                 return null;
@@ -65,6 +66,7 @@ public class InvalidArrayIndex extends AnalysisVisitor {
                 if (param.getType().getName().equals("int") && !param.getType().isArray()) {
                     return null;
                 }
+                //if (param.getType().getName().equals("int"))
             }
         }
 

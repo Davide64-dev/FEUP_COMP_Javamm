@@ -28,7 +28,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new ExpressionCondition(),
                 new StaticMethods(),
                 new InvalidAssign(),
-                new InvalidThis()
+                new InvalidThis(),
+                new InvalidParameters()
                 );
 
     }

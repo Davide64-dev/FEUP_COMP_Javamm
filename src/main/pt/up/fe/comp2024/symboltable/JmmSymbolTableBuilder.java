@@ -85,7 +85,7 @@ public class JmmSymbolTableBuilder {
             List<JmmNode> paramNodes = method.getChildren(PARAM);
             for (JmmNode param : paramNodes){
                 var paramName = param.get("name");
-                var type = new Type(param.getChild(0).get("name"), Boolean.parseBoolean(param.getChild(0).get("isArray")));
+                var type = new Type(param.getChild(0).get("name"), Boolean.parseBoolean(param.getChild(0).get("isArray")) || Boolean.parseBoolean(param.get("isVarArg")));
                 params.add(new Symbol(type, paramName));
             }
             map.put(methodName, params);

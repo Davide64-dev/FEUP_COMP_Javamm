@@ -61,6 +61,7 @@ public class InvalidArrayAccess extends AnalysisVisitor {
                     return null;
                 }
             }
+
         }
 
         var message = String.format("'%s' is not an array", arrayNode.get("name"));

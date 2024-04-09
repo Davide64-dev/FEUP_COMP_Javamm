@@ -9,18 +9,40 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-public class UndeclaredMethod extends AnalysisVisitor {
+public class InvalidParameters extends AnalysisVisitor {
 
     private String currentMethod;
 
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.METHOD_CALL, this::visitMethodCallExpr);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+
+        var params = method.getChildren(Kind.PARAM);
+
+        var nParams = params.size();
+
+        for (int i = 0; i < nParams - 1; i++){
+            var param = params.get(i);
+            if (param.get("isVarArg").equals("true")){
+
+                var message = String.format("Varargs can only be the last parameter");
+
+
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        message,
+                        null)
+                );
+
+            }
+        }
+
         return null;
     }
 
@@ -73,4 +95,5 @@ public class UndeclaredMethod extends AnalysisVisitor {
 
         return null;
     }
+
 }

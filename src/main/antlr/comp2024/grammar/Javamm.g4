@@ -96,8 +96,8 @@ methodDecl locals[boolean isPublic=false, boolean isStatic=false]
               varDecl* stmt* RCURLY;
 
 
-param
-    : type (MULTIPLE)? name=ID
+param locals[boolean isVarArg=false]
+    : type (MULTIPLE {$isVarArg=true;})? name=ID
     ;
 
 stmt
@@ -125,6 +125,7 @@ expr
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
+    | name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newArray
     | LSPAREN (expr (COMMA expr)*)? RSPAREN #arrayCall
