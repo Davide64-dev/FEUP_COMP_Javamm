@@ -41,6 +41,7 @@ public class JasminGenerator {
 
         this.generators = new FunctionClassMap<>();
         generators.put(ClassUnit.class, this::generateClassUnit);
+        generators.put(Field.class, this::generateField);
         generators.put(Method.class, this::generateMethod);
         generators.put(AssignInstruction.class, this::generateAssign);
         generators.put(SingleOpInstruction.class, this::generateSingleOp);
@@ -73,35 +74,32 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class public ").append(className).append(NL).append(NL); // all classes are public so this can be hard coded
 
-        // removed here the "Object" hard coded super class,
-        // not sure if this is right, though
-        if (ollirResult.getOllirClass().getSuperClass() != null) {
-            var superClassName = ollirResult.getOllirClass().getSuperClass().getClass().getName();
-            String super_str = ".super " + superClassName;
-            code.append(super_str).append(NL);
-        } else {
-            // classes inherit java/lang/Object by default
-            code.append(".super java/lang/Object").append(NL);
+        String superClassName = ollirResult.getOllirClass().getSuperClass();
+        if (superClassName == null) {
+            superClassName = "java/lang/Object";
+        }
+        code.append(String.format(".super %s", superClassName)).append(NL);
+
+        // fields???
+        code.append("; Fields").append(NL);
+        for (var field : ollirResult.getOllirClass().getFields()) {
+            code.append(generators.apply(field));
         }
 
-        // generate a single constructor method ---- o que é que é suposto fazer no caso de a classe ter o seu próprio construtor?
-        // como é que se vai buscar o construtor ao ollir
-        var defaultConstructor = """
-                ;default constructor
-                .method public <init>()V
-                    aload_0
-                    invokespecial java/lang/Object/<init>()V
-                    return
-                .end method
-                """;
+        // generate a single constructor method
+        var defaultConstructor = String.format("""
+            ; Default constructor
+            .method public <init>()V
+                aload_0
+                invokespecial %s/<init>()V
+                return
+            .end method
+            """, superClassName
+        );
         code.append(defaultConstructor);
 
         // generate code for all other methods
         for (var method : ollirResult.getOllirClass().getMethods()) {
-
-            System.out.println("\n|\n|\n");
-            System.out.println(code);
-            System.out.println("\n|\n|\n");
 
             // Ignore constructor, since there is always one constructor
             // that receives no arguments, and has been already added
@@ -116,23 +114,63 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String convertType(String ollirType) {
+        switch (ollirType) {
+            case "INT32":
+                return "I";
+            case "BOOLEAN":
+                return "Z";
+            case "STRING":
+                return "Ljava/lang/String";
+            case "VOID":
+                return "V";
+        }
+
+        return "error";
+    }
+
+    private String generateField(Field field) {
+        var code = new StringBuilder();
+
+        var fieldName = field.getFieldName();
+        var fieldType = field.getFieldType();
+
+        code.append(String.format(".field public %s %s", fieldName, convertType(fieldType.toString()))).append(NL);
+        return code.toString();
+    }
 
     private String generateMethod(Method method) {
-
         // set method
         currentMethod = method;
 
         var code = new StringBuilder();
+
+        var methodName = method.getMethodName();
 
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
                 method.getMethodAccessModifier().name().toLowerCase() + " " :
                 "";
 
-        var methodName = method.getMethodName();
+        var staticModifier = method.isStaticMethod() ? " static " : "";
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
+        // Add access modifier, static modifier and method name
+        code.append("\n.method ").append(modifier).append(staticModifier).append(methodName).append("(");
+
+        // Add parameter types
+        if (methodName.equals("main")) {
+            // skip calculating params, just hard code for this checkpoint
+            code.append("[Ljava/lang/String;");
+        } else {
+            for (var param : method.getParams()) {
+                code.append(convertType(param.getType().toString()));
+            }
+        }
+        code.append(")");
+
+        // Add return type
+        var returnType = convertType(method.getReturnType().toString());
+        code.append(returnType).append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
@@ -144,7 +182,6 @@ public class JasminGenerator {
 
             code.append(instCode);
         }
-
         code.append(".end method\n");
 
         // unset method
@@ -213,10 +250,15 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: Hardcoded to int return type, needs to be expanded
-
-        code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);
+        // I really don't know if there's a better way to compare types that
+        // doesn't involve converting to string
+        if (currentMethod.getReturnType().toString().equals("VOID")) {
+            code.append("return").append(NL);
+        } else {
+            // TODO: also still missing other return types for now!
+            code.append(generators.apply(returnInst.getOperand()));
+            code.append("ireturn").append(NL);
+        }
 
         return code.toString();
     }

@@ -57,7 +57,6 @@ public class JasminTest {
         System.out.println(testName + ":\n" + result.getJasminCode());
         var runOutput = result.runWithFullOutput();
         assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0, runOutput.getReturnValue());
-        System.out.println("\n Result: " + runOutput.getOutput());
 
         if (expectedOutput != null) {
             assertEquals(expectedOutput, runOutput.getOutput());
