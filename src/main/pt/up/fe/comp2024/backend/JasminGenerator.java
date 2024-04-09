@@ -114,19 +114,15 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String convertType(String ollirType) {
-        switch (ollirType) {
-            case "INT32":
-                return "I";
-            case "BOOLEAN":
-                return "Z";
-            case "STRING":
-                return "Ljava/lang/String";
-            case "VOID":
-                return "V";
-        }
-
-        return "error";
+    private String convertType(Type ollirType) {
+        return switch (ollirType.getTypeOfElement()) {
+            case INT32 -> "I";
+            case BOOLEAN -> "Z";
+            case VOID -> "V";
+            case CLASS -> "L" + ollirType.toString() + ";";
+            // case ARRAYREF -> "[" + ... to be implemented
+            default -> throw new NotImplementedException(ollirType.getTypeOfElement());
+        };
     }
 
     private String generateField(Field field) {
@@ -135,7 +131,7 @@ public class JasminGenerator {
         var fieldName = field.getFieldName();
         var fieldType = field.getFieldType();
 
-        code.append(String.format(".field public %s %s", fieldName, convertType(fieldType.toString()))).append(NL);
+        code.append(String.format(".field public %s %s", fieldName, convertType(fieldType))).append(NL);
         return code.toString();
     }
 
@@ -163,13 +159,13 @@ public class JasminGenerator {
             code.append("[Ljava/lang/String;");
         } else {
             for (var param : method.getParams()) {
-                code.append(convertType(param.getType().toString()));
+                code.append(convertType(param.getType()));
             }
         }
         code.append(")");
 
         // Add return type
-        var returnType = convertType(method.getReturnType().toString());
+        var returnType = convertType(method.getReturnType());
         code.append(returnType).append(NL);
 
         // Add limits
