@@ -71,12 +71,21 @@ public class JasminGenerator {
 
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class ").append(className).append(NL).append(NL);
+        code.append(".class public ").append(className).append(NL).append(NL); // all classes are public so this can be hard coded
 
-        // TODO: Hardcoded to Object, needs to be expanded
-        code.append(".super java/lang/Object").append(NL);
+        // removed here the "Object" hard coded super class,
+        // not sure if this is right, though
+        if (ollirResult.getOllirClass().getSuperClass() != null) {
+            var superClassName = ollirResult.getOllirClass().getSuperClass().getClass().getName();
+            String super_str = ".super " + superClassName;
+            code.append(super_str).append(NL);
+        } else {
+            // classes inherit java/lang/Object by default
+            code.append(".super java/lang/Object").append(NL);
+        }
 
-        // generate a single constructor method
+        // generate a single constructor method ---- o que é que é suposto fazer no caso de a classe ter o seu próprio construtor?
+        // como é que se vai buscar o construtor ao ollir
         var defaultConstructor = """
                 ;default constructor
                 .method public <init>()V
@@ -89,6 +98,10 @@ public class JasminGenerator {
 
         // generate code for all other methods
         for (var method : ollirResult.getOllirClass().getMethods()) {
+
+            System.out.println("\n|\n|\n");
+            System.out.println(code);
+            System.out.println("\n|\n|\n");
 
             // Ignore constructor, since there is always one constructor
             // that receives no arguments, and has been already added
