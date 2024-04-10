@@ -42,7 +42,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
-        addVisit(RETURN_STMT, this::visitReturn);
+        addVisit(RET_STMT, this::visitRetStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(IMPORT_DECLARATION, this::visitImpDecl);
         addVisit(VAR_DECL, this::visitVarDecl);
@@ -118,7 +118,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
 
-    private String visitReturn(JmmNode node, Void unused) {
+    private String visitRetStmt(JmmNode node, Void unused) {
 
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
@@ -169,30 +169,28 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
 
-        //tried to do many params
         // param
+        var paramCode = visit(node.getJmmChild(1));
         List<JmmNode> ParamNodes=node.getChildren(PARAM);
-        var paramCode="";
         code.append("(");
-        for(var i=0; i<=ParamNodes.size(); i++){
+        for(var i=0; i<ParamNodes.size(); i++){
             JmmNode P= ParamNodes.get(i);
-            paramCode += visitParam(P,null);
+            paramCode = visitParam(P,null);
             code.append(paramCode);
-            if(i!=ParamNodes.size()){
+            if(i!=ParamNodes.size()-1){
                 code.append(", ");
             }
         }
-
         code.append(")");
-
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
         code.append(retType);
         code.append(L_BRACKET);
 
+
         // rest of its children stmts
-        var afterParam = ParamNodes.size();
+        var afterParam = ParamNodes.size()+1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             var childCode = visit(child);
@@ -204,6 +202,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
+
+
 
 
     private String visitClass(JmmNode node, Void unused) {
