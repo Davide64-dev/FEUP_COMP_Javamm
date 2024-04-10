@@ -32,17 +32,15 @@ public class InvalidThis  extends AnalysisVisitor {
         System.out.println("This Found!");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
-        var condition = stmt.getChild(0);
 
-        System.out.println(condition);
         var method = stmt.getAncestor(Kind.METHOD_DECL);
 
         if (method.isPresent() && method.get().get("isStatic").equals("true")){
             var message = "This keyword cannot be used in static methods";
             addReport(Report.newError(
                     Stage.SEMANTIC,
-                    NodeUtils.getLine(condition),
-                    NodeUtils.getColumn(condition),
+                    NodeUtils.getLine(stmt),
+                    NodeUtils.getColumn(stmt),
                     message,
                     null)
             );

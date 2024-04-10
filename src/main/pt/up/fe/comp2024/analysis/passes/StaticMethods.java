@@ -28,10 +28,16 @@ public class StaticMethods extends AnalysisVisitor {
 
         System.out.println("Variable Found!");
 
+        var temp = thisExpr.getAncestor(Kind.METHOD_DECL).get();
+
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
-        if (thisExpr.get("isStatic").equals("true")){
-            return null;
+        try {
+            if (temp.get("isStatic").equals("false")) {
+                return null;
+            }
+        } catch (NullPointerException e) {
+
         }
 
         // Create error report
