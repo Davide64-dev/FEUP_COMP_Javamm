@@ -90,7 +90,7 @@ public class JasminGenerator {
 
         // generate a single constructor method
         var defaultConstructor = String.format("""
-            ; Default constructor
+            ; Constructor
             .method public <init>()V
                 aload_0
                 invokespecial %s/<init>()V
@@ -213,11 +213,46 @@ public class JasminGenerator {
     }
 
     private String generatePutFieldInstruction(PutFieldInstruction putFieldInstruction) {
-        return null;
+        var code = new StringBuilder();
+
+        var value = putFieldInstruction.getValue();
+        var field = putFieldInstruction.getField();
+
+        // load "this"
+        code.append("aload_0").append(NL);
+
+        // push value
+        // note: other instructions other than ldc exist, that may be more
+        // efficient in different situations. But I don't think that's needed here
+        code.append(generateLiteral((LiteralElement) value));
+
+        // put instruction
+        // this part seems ok for now
+        String className = currentMethod.getOllirClass().getClassName();
+        String fieldName = field.getName();
+        String fieldType = convertType(field.getType());
+        String putInst = String.format("putfield %s/%s %s", className, fieldName, fieldType);
+        code.append(putInst).append(NL);
+
+        return code.toString();
     }
 
     private String generateGetFieldInstruction(GetFieldInstruction getFieldInstruction) {
-        return null;
+        var code = new StringBuilder();
+
+        var field = getFieldInstruction.getField();
+
+        // load "this"
+        code.append("aload_0").append(NL);
+
+        // get instruction
+        String className = currentMethod.getOllirClass().getClassName();
+        String fieldName = field.getName();
+        String fieldType = convertType(field.getType());
+        String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
+        code.append(getInst).append(NL);
+
+        return code.toString();
     }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
