@@ -193,8 +193,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var afterParam = ParamNodes.size()+1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
-            var childCode = visit(child);
-            code.append(childCode);
+            if(!child.getKind().equals("VarDecl")){
+                var childCode = visit(child);
+                code.append(childCode);
+            }
         }
 
         code.append(R_BRACKET);
