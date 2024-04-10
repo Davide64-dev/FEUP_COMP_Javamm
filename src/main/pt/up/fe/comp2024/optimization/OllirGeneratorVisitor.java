@@ -4,8 +4,11 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
+
+import java.util.List;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -48,13 +51,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
 
+
+
     private String visitImpDecl(JmmNode node, Void s) { //Imports
         StringBuilder importStmt = new StringBuilder();
 
         for (var importID : table.getImports()) {
             if (importID.contains(node.get("ID"))) {
                 importStmt.append("import ");
-                importStmt.append(importID);
+                importStmt.append(node.get("ID"));
+                importStmt.append(";");
                 importStmt.append('\n');
             }
         }
@@ -63,14 +69,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitVarDecl(JmmNode node, Void s) {
-        StringBuilder code = new StringBuilder(".field ");
-// on the tree doesnt have attribute ig it is public
-//        boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
-//
-//        if (isPublic) {
-//            code.append("public ");
-//        }
+        StringBuilder code = new StringBuilder();
 
+        code.append(".field ");
         // name
         var name = node.get("name");
         code.append(name);
@@ -78,6 +79,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
         code.append(retType);
+        code.append(";");
         code.append(NL);
 
         return code.toString();
@@ -167,18 +169,30 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
 
+        //tried to do many params
         // param
-        var paramCode = visit(node.getJmmChild(1));
-        code.append("(").append(paramCode).append(")");
+        List<JmmNode> ParamNodes=node.getChildren(PARAM);
+        var paramCode="";
+        code.append("(");
+        for(var i=0; i<=ParamNodes.size(); i++){
+            JmmNode P= ParamNodes.get(i);
+            paramCode += visitParam(P,null);
+            code.append(paramCode);
+            if(i!=ParamNodes.size()){
+                code.append(", ");
+            }
+        }
+
+        code.append(")");
+
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
         code.append(retType);
         code.append(L_BRACKET);
 
-
         // rest of its children stmts
-        var afterParam = 2;
+        var afterParam = ParamNodes.size();
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             var childCode = visit(child);
