@@ -10,6 +10,7 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +52,7 @@ public class JasminGenerator {
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
+        generators.put(CallInstruction.class, this::generateCallInstruction);
     }
 
     public List<Report> getReports() {
@@ -197,6 +199,7 @@ public class JasminGenerator {
         // store value in the stack in destination
         var lhs = assign.getDest();
 
+        // TODO: What is this?
         if (!(lhs instanceof Operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
@@ -206,8 +209,14 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: Hardcoded for int type, needs to be expanded
-        code.append("istore ").append(reg).append(NL);
+        // TODO: I think this is good and supports all possible types, but not sure
+        code.append(
+            switch (assign.getTypeOfAssign().getTypeOfElement()) {
+                case INT32, BOOLEAN -> "istore ";
+                case OBJECTREF -> "astore ";
+                default -> "error ";
+            }
+        ).append(reg).append(NL);
 
         return code.toString();
     }
@@ -251,6 +260,47 @@ public class JasminGenerator {
         String fieldType = convertType(field.getType());
         String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
         code.append(getInst).append(NL);
+
+        return code.toString();
+    }
+
+    private String generateCallInstruction(CallInstruction callInstruction) {
+        var code = new StringBuilder();
+
+        String currentClassName = currentMethod.getOllirClass().getClassName();
+        String inst;
+        var invocationType = callInstruction.getInvocationType();
+
+        if (invocationType == CallType.NEW) {
+            inst = "new " + currentClassName;
+            code.append(inst).append(NL);
+            code.append("dup");
+            code.append(NL);
+            return code.toString();
+        }
+
+        // get arguments
+        StringBuilder arguments = new StringBuilder();
+        for (var argument : callInstruction.getArguments()) {
+            arguments.append(convertType(argument.getType()));
+        }
+
+        switch (callInstruction.getInvocationType()) {
+            case invokespecial:
+                LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
+                String returnType = convertType(callInstruction.getReturnType());
+                inst = String.format(
+                        "invokespecial %s/%s(%s)%s",
+                        currentClassName,
+                        methodLiteral.getLiteral().replace("\"", ""),
+                        arguments,
+                        returnType
+                );
+                code.append(inst);
+                break;
+        }
+
+        code.append(NL);
 
         return code.toString();
     }
