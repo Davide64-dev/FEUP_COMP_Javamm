@@ -268,11 +268,12 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         String currentClassName = currentMethod.getOllirClass().getClassName();
+        String methodClassName = ((ClassType) callInstruction.getCaller().getType()).getName(); // this should be ok now
         String inst;
         var invocationType = callInstruction.getInvocationType();
 
         if (invocationType == CallType.NEW) {
-            inst = "new " + currentClassName;
+            inst = "new " + methodClassName;
             code.append(inst).append(NL);
             code.append("dup");
             code.append(NL);
@@ -291,7 +292,7 @@ public class JasminGenerator {
                 String returnType = convertType(callInstruction.getReturnType());
                 inst = String.format(
                         "invokespecial %s/%s(%s)%s",
-                        currentClassName,
+                        methodClassName,
                         methodLiteral.getLiteral().replace("\"", ""),
                         arguments,
                         returnType
