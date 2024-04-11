@@ -267,10 +267,12 @@ public class JasminGenerator {
     private String generateCallInstruction(CallInstruction callInstruction) {
         var code = new StringBuilder();
 
-        String currentClassName = currentMethod.getOllirClass().getClassName();
-        String methodClassName = ((ClassType) callInstruction.getCaller().getType()).getName(); // this should be ok now
-        String inst;
         var invocationType = callInstruction.getInvocationType();
+        String methodClassName =
+                (invocationType == CallType.NEW || invocationType == CallType.invokespecial) ?
+                ((ClassType) callInstruction.getCaller().getType()).getName() :
+                ((Operand) callInstruction.getCaller()).getName(); // this should be ok now
+        String inst;
 
         if (invocationType == CallType.NEW) {
             inst = "new " + methodClassName;
@@ -286,7 +288,7 @@ public class JasminGenerator {
             arguments.append(convertType(argument.getType()));
         }
 
-        switch (callInstruction.getInvocationType()) {
+        /* switch (callInstruction.getInvocationType()) {
             case invokespecial:
                 LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
                 String returnType = convertType(callInstruction.getReturnType());
@@ -299,9 +301,19 @@ public class JasminGenerator {
                 );
                 code.append(inst);
                 break;
-        }
+        } */
 
-        code.append(NL);
+        LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
+        String returnType = convertType(callInstruction.getReturnType());
+        inst = String.format(
+                "%s %s/%s(%s)%s",
+                callInstruction.getInvocationType().toString(),
+                methodClassName,
+                methodLiteral.getLiteral().replace("\"", ""),
+                arguments,
+                returnType
+        );
+        code.append(inst).append(NL);
 
         return code.toString();
     }
