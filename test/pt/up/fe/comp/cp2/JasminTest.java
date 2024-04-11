@@ -37,6 +37,7 @@ public class JasminTest {
         JasminResult result = null;
 
         // If AstToJasmin pipeline, change name of the resource and execute other test
+        // we're not doing this one
         if (TestUtils.hasAstToJasminClass()) {
 
             // Rename resource
@@ -45,19 +46,17 @@ public class JasminTest {
             // Test Jmm resource
             result = TestUtils.backend(SpecsIo.getResource(jmmResource));
 
-        } else {
+        } else { // for testing ollir to jasmin, which is the one we're doing
 
             var ollirResult = new OllirResult(SpecsIo.getResource(resource), Collections.emptyMap());
-
             result = TestUtils.backend(ollirResult);
         }
 
-        
+
         var testName = new File(resource).getName();
         System.out.println(testName + ":\n" + result.getJasminCode());
         var runOutput = result.runWithFullOutput();
         assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0, runOutput.getReturnValue());
-        System.out.println("\n Result: " + runOutput.getOutput());
 
         if (expectedOutput != null) {
             assertEquals(expectedOutput, runOutput.getOutput());
