@@ -46,7 +46,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(IMPORT_DECLARATION, this::visitImpDecl);
         addVisit(VAR_DECL, this::visitVarDecl);
-
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -71,16 +70,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitVarDecl(JmmNode node, Void s) {
         StringBuilder code = new StringBuilder();
 
-        code.append(".field ");
-        // name
-        var name = node.get("name");
-        code.append(name);
 
-        // type
-        var retType = OptUtils.toOllirType(node.getJmmChild(0));
-        code.append(retType);
-        code.append(";");
-        code.append(NL);
+        if (node.getParent().getKind().equals(CLASS_DECL.toString())){
+            code.append(".field public ");
+            var name = node.get("name");
+            code.append(name);
+            var retType = OptUtils.toOllirType(node.getJmmChild(0));
+            code.append(retType);
+            code.append(";");
+            code.append(NL);
+        }
 
         return code.toString();
     }
@@ -147,11 +146,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitParam(JmmNode node, Void unused) {
 
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
+        var isArray = node.getChild(0).get("isArray");
         var id = node.get("name");
+        StringBuilder code = new StringBuilder();
 
-        String code = id + typeCode;
+        code.append(id);
+        if (isArray.equals("true")){
+            code.append(".array");
+        }
 
-        return code;
+        code.append(typeCode);
+
+        return code.toString();
     }
 
 
@@ -191,6 +197,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // rest of its children stmts
         var afterParam = ParamNodes.size()+1;
+        var params = node.getChildren();
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             if(!child.getKind().equals("VarDecl")){
@@ -207,7 +214,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
 
-
     private String visitClass(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder();
@@ -217,6 +223,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var superClass = table.getSuper();
         if (!superClass.isEmpty()) {
             code.append(" extends ").append(superClass);
+        }
+        else{
+            code.append(" extends Object");
         }
         code.append(L_BRACKET);
 
@@ -257,6 +266,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .map(this::visit)
                 .forEach(code::append);
 
+        System.out.println(code.toString());
         return code.toString();
     }
 

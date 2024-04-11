@@ -24,7 +24,9 @@ public enum Kind {
     WHILE_STMT,
     IF_STMT,
     THIS,
-    IMPORT_DECLARATION;
+    IMPORT_DECLARATION,
+
+    BINARY_OP;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RET_STMT);
