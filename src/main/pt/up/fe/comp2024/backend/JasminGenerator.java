@@ -288,21 +288,6 @@ public class JasminGenerator {
             arguments.append(convertType(argument.getType()));
         }
 
-        /* switch (callInstruction.getInvocationType()) {
-            case invokespecial:
-                LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
-                String returnType = convertType(callInstruction.getReturnType());
-                inst = String.format(
-                        "invokespecial %s/%s(%s)%s",
-                        methodClassName,
-                        methodLiteral.getLiteral().replace("\"", ""),
-                        arguments,
-                        returnType
-                );
-                code.append(inst);
-                break;
-        } */
-
         LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
         String returnType = convertType(callInstruction.getReturnType());
         inst = String.format(
