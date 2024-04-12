@@ -27,24 +27,29 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     protected void buildVisitor() {
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
-        addVisit(INTEGER_LITERAL, this::visitInteger);
-
+        addVisit(CONST, this::visitConst);
+   
         setDefaultVisit(this::defaultVisit);
     }
 
-
-    private OllirExprResult visitInteger(JmmNode node, Void unused) {
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
-        String ollirIntType = OptUtils.toOllirType(intType);
-        String code = node.get("value") + ollirIntType;
-        return new OllirExprResult(code);
+    private OllirExprResult visitConst(JmmNode node, Void unused) {
+        if (!node.get("name").equals("true") && !node.get("name").equals("false")) {
+            var intType = new Type(TypeUtils.getIntTypeName(), false);
+            String ollirIntType = OptUtils.toOllirType(intType);
+            String code = node.get("name") + ollirIntType;
+            return new OllirExprResult(code);
+        }
+        else{
+            String code = node.get("name") + "boolean";
+            return new OllirExprResult(code);
+        }
     }
 
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
 
         var lhs = visit(node.getJmmChild(0));
-        var rhs = visit(node.getJmmChild(1));
+        var rhs = visit(node.getJmmChild(2));
 
         StringBuilder computation = new StringBuilder();
 
@@ -62,7 +67,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 .append(lhs.getCode()).append(SPACE);
 
         Type type = TypeUtils.getExprType(node, table);
-        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+        computation.append(node.getChild(1).get("name")).append(OptUtils.toOllirType(type)).append(SPACE)
                 .append(rhs.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
