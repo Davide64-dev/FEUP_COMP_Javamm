@@ -126,9 +126,6 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             return new Type(type.get("name"), false);
         }
 
-        if (variable.getKind().equals(Kind.THIS.toString())){
-            return getVariableType(variable, table, currentMethod);
-        }
 
         return new Type("", false);
     }
