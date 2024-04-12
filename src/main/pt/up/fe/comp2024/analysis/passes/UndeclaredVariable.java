@@ -63,6 +63,12 @@ public class UndeclaredVariable extends AnalysisVisitor {
             return null;
         }
 
+        for (var importStmt : table.getImports()){
+            if (importStmt.substring(1, importStmt.length() - 1).equals(varRefName)){
+                return null;
+            }
+        }
+
         // Create error report
         System.out.println("There was an error");
         var message = String.format("Variable '%s' does not exist.", varRefName);

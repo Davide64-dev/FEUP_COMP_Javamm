@@ -50,6 +50,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
                     !getVariableType(leftOperand, table, currentMethod).isArray())){
                 System.out.println("Left Operand is an Integer");
 
+                var debug1 = getVariableType(rightOperand, table, currentMethod);
                 if (getVariableType(rightOperand, table, currentMethod).equals("int") &&
                         !getVariableType(leftOperand, table, currentMethod).isArray()){
                     System.out.print("Right Operand is an Integer");
