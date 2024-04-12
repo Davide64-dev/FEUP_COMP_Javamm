@@ -33,10 +33,21 @@ public class JasminTest {
         testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminFields.ollir");
     }
 
+    @Test
+    public void ollirHelloWorld() {
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirHelloWorld.ollir");
+    }
+
+    @Test
+    public void ollirSimple() {
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirSimple.ollir");
+    }
+
     public static void testOllirToJasmin(String resource, String expectedOutput) {
         JasminResult result = null;
 
         // If AstToJasmin pipeline, change name of the resource and execute other test
+        // we're not doing this one
         if (TestUtils.hasAstToJasminClass()) {
 
             // Rename resource
@@ -45,19 +56,17 @@ public class JasminTest {
             // Test Jmm resource
             result = TestUtils.backend(SpecsIo.getResource(jmmResource));
 
-        } else {
+        } else { // for testing ollir to jasmin, which is the one we're doing
 
             var ollirResult = new OllirResult(SpecsIo.getResource(resource), Collections.emptyMap());
-
             result = TestUtils.backend(ollirResult);
         }
 
-        
+
         var testName = new File(resource).getName();
         System.out.println(testName + ":\n" + result.getJasminCode());
         var runOutput = result.runWithFullOutput();
         assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0, runOutput.getReturnValue());
-        System.out.println("\n Result: " + runOutput.getOutput());
 
         if (expectedOutput != null) {
             assertEquals(expectedOutput, runOutput.getOutput());
