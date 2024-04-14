@@ -119,11 +119,12 @@ binaryOp
     | name=LESS;
 
 expr
-    : LPAREN expr RPAREN #parantheses
+    : expr binaryOp expr #binaryExpr
     | NOT expr #notOp
-    | expr binaryOp expr #binaryExpr
+    | LPAREN expr RPAREN #parantheses
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
+    | THIS DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
@@ -132,9 +133,11 @@ expr
     | name=TRUE #const
     | name=FALSE #const
     | name=ID #varRefExpr
-    | name=THIS #this
     | name=INTEGER #const
+    | name=THIS #thisExpr
     ;
+
+
 
 
 

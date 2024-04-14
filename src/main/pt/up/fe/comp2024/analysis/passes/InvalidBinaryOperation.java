@@ -22,7 +22,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.BINARY_EXPR, this::visitMethodCallExpr);
+        addVisit(Kind.BINARY_EXPR, this::visitBinaryExpr);
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
     }
 
@@ -31,7 +31,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitMethodCallExpr(JmmNode binaryRefExpr, SymbolTable table) {
+    private Void visitBinaryExpr(JmmNode binaryRefExpr, SymbolTable table) {
 
         System.out.println("Binary Expression Found");
 
@@ -51,7 +51,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
                 System.out.println("Left Operand is an Integer");
 
                 var debug1 = getVariableType(rightOperand, table, currentMethod);
-                if (getVariableType(rightOperand, table, currentMethod).equals("int") &&
+                if (getVariableType(rightOperand, table, currentMethod).getName().equals("int") &&
                         !getVariableType(leftOperand, table, currentMethod).isArray()){
                     System.out.print("Right Operand is an Integer");
                     return null;
