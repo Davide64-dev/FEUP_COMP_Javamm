@@ -53,13 +53,21 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         var callParams = methodRefExpr.getChildren(Kind.PARAM);
 
-        if (methodParams.get(methodParams.size()-1).getType().isArray()){
-            // ignore
-            System.out.println("It has varargs");
+
+        if (methodParams.size() == 0 && callParams.size() == 0){
+            // none has 1 parameter only
             return null;
         }
 
-        else if (methodParams.size() != callParams.size()){
+        try {
+            if (methodParams.get(methodParams.size() - 1).getType().isArray()) {
+                // ignore
+                System.out.println("It has varargs");
+                return null;
+            }
+        } catch (IndexOutOfBoundsException e){}
+
+        if (methodParams.size() != callParams.size()){
             var message = "The number of parameters are not the same";
             addReport(Report.newError(
                     Stage.SEMANTIC,
@@ -86,7 +94,7 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         // Create error report
         System.out.println("There was an error");
-        var message = String.format("Method '%s' does not exist.", methodRefName);
+        var message = String.format("Argumets do are not compatible", methodRefName);
 
 
 
