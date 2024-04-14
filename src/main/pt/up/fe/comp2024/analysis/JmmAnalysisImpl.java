@@ -29,7 +29,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new StaticMethods(),
                 new InvalidAssign(),
                 new InvalidThis(),
-                new InvalidParameters()
+                new InvalidParameters(),
+                new MethodCallParameters()
                 );
 
     }
