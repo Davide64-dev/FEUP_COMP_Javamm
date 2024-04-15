@@ -285,37 +285,30 @@ public class JasminGenerator {
             return code.toString();
         }
 
+        // get load instructions and call instruction arguments
+        StringBuilder loadInstructions = new StringBuilder();
+        StringBuilder arguments = new StringBuilder();
         if (invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) {
-            System.out.println("arguments: " + callInstruction.getArguments());
-            System.out.println("arguments: " + callInstruction.getOperands());
             for (var operand : callInstruction.getOperands()) {
                 if (operand instanceof Operand) {
-
-                    var reg = currentMethod.getVarTable().get(((Operand)operand).getName()).getVirtualReg();
-                    System.out.println("register for ting: " + reg);
-                    // code.append("aload " + reg).append(NL);
-                    code.append(generateOperand((Operand) operand));
+                    loadInstructions.append(generateOperand((Operand) operand));
                 }
             }
         }
-
-        // get arguments
-        StringBuilder arguments = new StringBuilder();
         for (var argument : callInstruction.getArguments()) {
             arguments.append(convertType(argument.getType()));
 
-            // append load instructions to code
-            // this is sort of provisional, I think
-            if (invocationType != CallType.invokevirtual) {
-                String op = generateOperand((Operand) argument);
-                code.append(op);
-            }
+            if (invocationType == CallType.invokevirtual) continue;
+
+            String op = generateOperand((Operand) argument);
+            loadInstructions.append(op);
         }
 
         LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
         String returnType = convertType(callInstruction.getReturnType());
         inst = String.format(
-                "%s %s/%s(%s)%s",
+                "%s%s %s/%s(%s)%s",
+                loadInstructions,
                 callInstruction.getInvocationType().toString(),
                 methodClassName,
                 methodLiteral.getLiteral().replace("\"", ""),
@@ -349,7 +342,7 @@ public class JasminGenerator {
             default -> "aload ";
         };
 
-        return loadInst + reg + NL;
+        return loadInst + reg + NL; // this NL should NOT be removed
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
