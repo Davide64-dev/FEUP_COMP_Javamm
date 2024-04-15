@@ -10,6 +10,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MethodCallParameters extends AnalysisVisitor {
@@ -51,7 +52,14 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         if (!inTable) return null;
 
-        var callParams = methodRefExpr.getChildren(Kind.PARAM);
+        var callParams = methodRefExpr.getChildren(Kind.EXPR);
+
+        if (methodRefExpr.get("ignore_first").equals("true") && !methodParams.isEmpty()) {
+            // Creating a new List to store parameters, excluding the first one
+            var callParams1 = new ArrayList<>(callParams.subList(1, callParams.size()));
+            // Assigning the new list to callParams
+            callParams = callParams1;
+        }
 
 
         if (methodParams.size() == 0 && callParams.size() == 0){
@@ -79,16 +87,28 @@ public class MethodCallParameters extends AnalysisVisitor {
             return null;
         }
 
+        boolean alright = true;
+
         for (int i = 0; i < methodParams.size(); i++){
             var expected = methodParams.get(i).getType();
             var actual = getVariableType(callParams.get(i), table, currentMethod);
             if (expected.getName().equals(actual.getName())){
                 if (expected.isArray() == actual.isArray()){
                     // same type, must return;
-                    return null;
+                    continue;
+                }
+                else{
+                    alright = false;
+                    break;
                 }
             }
+            else{
+                alright = false;
+                break;
+            }
         }
+
+        if (alright) return null;
 
 
 

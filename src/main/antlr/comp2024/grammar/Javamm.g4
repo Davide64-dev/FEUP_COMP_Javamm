@@ -118,14 +118,14 @@ binaryOp
     | name=MINUS
     | name=LESS;
 
-expr
+expr locals[boolean isVirtual=false, boolean ignore_first=false]
     : expr binaryOp expr #binaryExpr
     | NOT expr #notOp
     | LPAREN expr RPAREN #parantheses
     | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #objectVar
-    | THIS DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
-    | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
+    | THIS DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$isVirtual=true; $ignore_first=true;} #methodCall
+    | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$ignore_first=true;} #methodCall
     | name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newArray

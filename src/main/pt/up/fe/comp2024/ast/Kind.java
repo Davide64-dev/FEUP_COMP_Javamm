@@ -29,7 +29,9 @@ public enum Kind {
 
     ARRAY_CALL,
 
-    BINARY_OP;
+    BINARY_OP,
+
+    EXPR;
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RET_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);
