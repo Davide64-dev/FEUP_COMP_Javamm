@@ -81,4 +81,16 @@ public class JmmSymbolTable implements SymbolTable {
         return Collections.unmodifiableList(locals.get(methodSignature));
     }
 
+    public boolean hasVariable(String variable, String method){
+        for (var field : fields){
+            if (field.getName().equals(variable)) return true;
+        }
+        for (var varia : getLocalVariables(method)){
+            if (varia.getName().equals(variable)) return true;
+        }
+
+        return false;
+
+    }
+
 }

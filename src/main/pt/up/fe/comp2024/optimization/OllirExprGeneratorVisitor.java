@@ -1,9 +1,11 @@
 package pt.up.fe.comp2024.optimization;
 
+import org.specs.comp.ollir.Ollir;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -28,8 +30,54 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(CONST, this::visitConst);
+        addVisit(METHOD_CALL, this::visitMethodCall);
    
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirExprResult visitMethodCall(JmmNode node, Void unused){
+
+        StringBuilder computation = new StringBuilder();
+        if (node.getKind().toString().equals("newObject")){
+            // invokespecial(temp_2.Simple,"<init>").V;
+            String code = "";
+            return new OllirExprResult(code);
+        }
+
+        String methodName = node.get("name");
+
+        if (node.get("ignore_first").equals("true")){
+            // normal method
+
+            var tempVar = OptUtils.getTemp();
+
+            var type = table.getReturnType(methodName);
+
+            String ollirType = OptUtils.toOllirType(type);
+
+            String code = tempVar + ollirType;
+
+            computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(this, \"" + methodName + "\")").append(ollirType).append(";\n");
+
+            return new OllirExprResult(code,computation);
+
+        }
+
+        for (var field : table.getFields()){
+            if (field.getName().equals(node.getChild(0).get("name"))) {
+                computation.append("code");
+                return new OllirExprResult("code");
+            }
+        }
+        for (var varia : table.getLocalVariables(methodName)){
+            if (varia.getName().equals(node.getChild(0).get("name"))) {
+                computation.append("code");
+                return new OllirExprResult("code");
+            }
+        }
+
+
+        return null;
     }
 
     private OllirExprResult visitConst(JmmNode node, Void unused) {
