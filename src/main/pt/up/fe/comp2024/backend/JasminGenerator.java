@@ -269,9 +269,11 @@ public class JasminGenerator {
 
         var invocationType = callInstruction.getInvocationType();
         String methodClassName =
-                (invocationType == CallType.NEW || invocationType == CallType.invokespecial) ?
+                (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
                 ((ClassType) callInstruction.getCaller().getType()).getName() :
                 ((Operand) callInstruction.getCaller()).getName(); // this should be ok now
+                // ...it isn't :/
+                // but maybe now it is?? I think??...
         String inst;
 
         if (invocationType == CallType.NEW) {
@@ -286,6 +288,10 @@ public class JasminGenerator {
         StringBuilder arguments = new StringBuilder();
         for (var argument : callInstruction.getArguments()) {
             arguments.append(convertType(argument.getType()));
+
+            // append load instructions to code
+            String op = generateOperand((Operand) argument);
+            code.append(op);
         }
 
         LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
