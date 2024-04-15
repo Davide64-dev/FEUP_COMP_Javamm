@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -8,6 +9,8 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -24,6 +27,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
 
+    public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+", "<");
+
+    public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||");
+
 
     private final SymbolTable table;
 
@@ -33,6 +40,91 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         this.table = table;
         exprVisitor = new OllirExprGeneratorVisitor(table);
     }
+
+    protected Type getVariableType(JmmNode variable, String currentMethod){
+        System.out.println("Arithmetic Operation");
+
+        // If the value is a variable
+        if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
+
+            if (this.table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
+
+                for (var symbol : this.table.getFields()){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
+            }
+
+            if (this.table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
+
+                for (var symbol : this.table.getParameters(currentMethod)){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
+                return null;
+            }
+
+            if (this.table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(variable.get("name")))) {
+
+                List<Symbol> symbols = this.table.getLocalVariables(currentMethod);
+
+                for (var symbol : symbols){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
+            }
+
+        }
+
+        // If the value is const
+        if (variable.getKind().equals(Kind.CONST.toString())){
+            if (variable.get("name").equals("true") || variable.get("name").equals("false")){
+                return new Type("boolean", false);
+            }
+            else{
+                return new Type("int", false);
+            }
+        }
+
+        // If the value is another node
+        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
+            var operator = variable.getChild(1);
+            if (ARITHMETIC_OPERATORS.contains(operator.get("name")) && !operator.get("name").equals("<")){
+                return new Type("int", false);
+            }
+
+            else{
+                return new Type("boolean", false);
+            }
+
+        }
+
+        // If the variable is a function
+        if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
+            var methods =this.table.getMethods();
+
+            for (var method : methods){
+                if (method.equals(variable.get("name"))){
+                    return this.table.getReturnType(method);
+                }
+            }
+        }
+
+        if (variable.getKind().equals(Kind.NEW_OBJECT.toString())){
+            var type = variable.getChild(0);
+            return new Type(type.get("name"), false);
+        }
+
+
+        return new Type("", false);
+    }
+
 
 
     @Override
@@ -65,14 +157,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder functionaCall = new StringBuilder();
         String name = node.get("name");
         String object = node.getChild(0).get("name");
-        String argument = node.getChild(1).get("name");
 
-        //var variables = table.getLocalVariables(node.getAncestor(METHOD_DECL).get().get("name"));
-        var argumentType = ".i32";
+        functionaCall.append("invokestatic(").append(object).append(", \"").append(name).append("\"");
 
-        functionaCall.append("invokestatic(").append(object).append(", \"").append(name).append("\", ");
+        var methodName = node.getAncestor(CLASS_DECL).get().get("name");
 
-        functionaCall.append(argument).append(argumentType).append(")");
+        try {
+            for (int i = 1; i < node.getNumChildren(); i++) {
+                String argument = node.getChild(i).get("name");
+                // need to get argument type
+                var argumentType = this.getVariableType(node.getChild(i), methodName);
+
+                functionaCall.append(argument).append(", ").append(argumentType);
+
+            }
+        } catch (NullPointerException e) {}
+
+        functionaCall.append(")");
 
         functionaCall.append(".V;").append(NL);
 
