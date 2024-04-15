@@ -126,6 +126,10 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             return new Type(type.get("name"), false);
         }
 
+        if (variable.getKind().equals("ArrayAccess")){
+            return new Type("int", false);
+        }
+
 
         return new Type("", false);
     }

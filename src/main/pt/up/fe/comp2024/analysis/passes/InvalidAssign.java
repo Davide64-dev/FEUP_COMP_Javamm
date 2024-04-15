@@ -123,7 +123,24 @@ public class InvalidAssign extends AnalysisVisitor {
 
         // Check if a class extends the other
 
+        if (assignee.getKind().toString().equals("ArrayCall")){
+            if (!assignedType.isArray()){
+                var message = String.format("'%s' type do not correspond to the correct type", assigned.get("name"));
 
+
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assignExpr),
+                        NodeUtils.getColumn(assignExpr),
+                        message,
+                        null)
+                );
+                return null;
+            }
+        }
+
+        // imported class
+        if (assigneeType.getName().isEmpty()) return null;
         if (isExtended) {
             if (superClass.equals(assignedType.getName())) {
                 System.out.println("One object extends the other");

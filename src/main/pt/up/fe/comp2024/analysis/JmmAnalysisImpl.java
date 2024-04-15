@@ -30,7 +30,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new InvalidAssign(),
                 new InvalidThis(),
                 new InvalidParameters(),
-                new MethodCallParameters()
+                new MethodCallParameters(),
+                new IncompatibleReturn()
                 );
 
     }
