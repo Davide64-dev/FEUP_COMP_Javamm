@@ -284,14 +284,31 @@ public class JasminGenerator {
             return code.toString();
         }
 
+        if (invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) {
+            System.out.println("arguments: " + callInstruction.getArguments());
+            System.out.println("arguments: " + callInstruction.getOperands());
+            for (var operand : callInstruction.getOperands()) {
+                if (operand instanceof Operand) {
+
+                    var reg = currentMethod.getVarTable().get(((Operand)operand).getName()).getVirtualReg();
+                    System.out.println("register for ting: " + reg);
+                    // code.append("aload " + reg).append(NL);
+                    code.append(generateOperand((Operand) operand));
+                }
+            }
+        }
+
         // get arguments
         StringBuilder arguments = new StringBuilder();
         for (var argument : callInstruction.getArguments()) {
             arguments.append(convertType(argument.getType()));
 
             // append load instructions to code
-            String op = generateOperand((Operand) argument);
-            code.append(op);
+            // this is sort of provisional, I think
+            if (invocationType != CallType.invokevirtual) {
+                String op = generateOperand((Operand) argument);
+                code.append(op);
+            }
         }
 
         LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
@@ -306,6 +323,10 @@ public class JasminGenerator {
         );
         code.append(inst).append(NL);
 
+        if (invocationType == CallType.invokespecial) {
+            code.append("pop").append(NL);
+        }
+
         return code.toString();
     }
 
@@ -319,8 +340,15 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
+        var varType = currentMethod.getVarTable().get(operand.getName()).getVarType();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+
+        String loadInst = switch (varType.getTypeOfElement()) {
+            case INT32, BOOLEAN -> "iload ";
+            default -> "aload ";
+        };
+
+        return loadInst + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
