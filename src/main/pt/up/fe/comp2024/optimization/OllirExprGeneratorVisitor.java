@@ -8,6 +8,9 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -44,16 +47,19 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         StringBuilder computation = new StringBuilder();
 
+
+        // temp_2.Simple :=.Simple new(Simple).Simple;
         computation.append(tempVar).append(".").append(typeName).append(SPACE)
                         .append(ASSIGN).append(".").append(typeName).append(" new(").append(typeName).append(")")
                         .append(".").append(typeName).append(";\n");
 
+        //invokespecial(temp_2.Simple,"<init>").V;
         computation.append("invokespecial(").append(tempVar).append(".").append(typeName).append(",\"<init>\").V;\n");
+
+        //s.Simple :=.Simple temp_2.Simple;
         var code = tempVar + "." + typeName;
         return new OllirExprResult(code,computation);
-        // temp_2.Simple :=.Simple new(Simple).Simple;
-        //invokespecial(temp_2.Simple,"<init>").V;
-        //s.Simple :=.Simple temp_2.Simple;
+
 
     }
 
@@ -74,15 +80,41 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
             String code = tempVar + ollirType;
 
-            //Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
-            //String typeString = OptUtils.toOllirType(thisType);
-
             if (node.get("is_this").equals("true"))
                 computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(this, \"" + methodName + "\")").append(ollirType).append(";\n");
                 // missing arguments to pass;
-            else
+            else {
+                Type typeObject = new Type("", false);
+                for (var variable : table.getFields()) {
+                    if (variable.getName().equals(node.getChild(0).get("name"))) {
+                        typeObject = variable.getType();
+                    }
+                }
+
+                for (var variable : table.getLocalVariables(node.getAncestor(METHOD_DECL).get().get("name"))){
+                    if (variable.getName().equals(node.getChild(0).get("name"))){
+                        typeObject = variable.getType();
+                    }
+                }
+
+                var parameters = node.getChildren().subList(1, node.getNumChildren());
+
+                var parametersWithType = new ArrayList<String>();
+                for (var parameter : parameters){
+                    var par = visit(parameter);
+                    if (!par.getComputation().isEmpty()) computation.append(par.getComputation()).append(";\n");
+                    parametersWithType.add(par.getCode());
+                }
+
                 computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(").append(node.getChild(0).get("name"))
-                        .append(".").append("Simple").append(", \"" + methodName + "\")").append(ollirType).append(";\n");
+                        .append(".").append(typeObject.getName()).append(", \"" + methodName + "\"");
+
+                for (var parameter : parametersWithType){
+                    computation.append(", ").append(parameter);
+                }
+
+                computation.append(")").append(ollirType).append(";\n");
+            }
             return new OllirExprResult(code,computation);
 
         }

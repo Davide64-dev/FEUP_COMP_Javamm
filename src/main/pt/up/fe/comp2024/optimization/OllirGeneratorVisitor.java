@@ -165,10 +165,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         try {
             for (int i = 1; i < node.getNumChildren(); i++) {
                 String argument = node.getChild(i).get("name");
+                var temp = exprVisitor.visit(node.getChild(i));
                 // need to get argument type
-                var argumentType = this.getVariableType(node.getChild(i), methodName);
+                //var argumentType = this.getVariableType(node.getChild(i), methodName);
 
-                functionaCall.append(argument).append(", ").append(argumentType);
+                functionaCall.append(",").append(temp.getCode());
 
             }
         } catch (NullPointerException e) {}
@@ -299,6 +300,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append("public ");
         }
 
+        if (node.get("isStatic").equals("true")){
+            code.append("static ");
+        }
+
         // name
         var name = node.get("name");
         code.append(name);
@@ -340,6 +345,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
+        if (node.getChild(0).get("name").equals("void")){
+            code.append("ret.V;\n");
+        }
+
         code.append(R_BRACKET);
         code.append(NL);
 
@@ -359,7 +368,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(" extends ").append(superClass);
         }
         else{
-            code.append(" extends Object");
+            System.out.println("Not have a superclass");
+            //code.append(" extends Object");
         }
         code.append(L_BRACKET);
 
