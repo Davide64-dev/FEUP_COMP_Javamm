@@ -33,6 +33,12 @@ public class OllirTest {
     }
 
     @Test
+    public void compileMethodInvocation1() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/arithmeticComplexAddDiv.jmm",
+                this::compileArithmetic);
+    }
+
+    @Test
     public void compileAssignment() {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileAssignment.jmm", this::compileAssignment);
     }

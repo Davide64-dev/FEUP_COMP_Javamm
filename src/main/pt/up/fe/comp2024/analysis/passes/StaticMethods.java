@@ -28,7 +28,6 @@ public class StaticMethods extends AnalysisVisitor {
 
     private Void visitVar(JmmNode varExpr, SymbolTable table){
         var temp = varExpr.getAncestor(Kind.METHOD_DECL).get();
-        boolean isValid;
         try {
             if (temp.get("isStatic").equals("false")) {
                 return null;
