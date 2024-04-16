@@ -25,6 +25,21 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+
+        if (currentMethod.equals("main")){
+            if (method.getChild(1).getChild(0).get("name").equals("String")){
+                if (method.getChild(1).getChild(0).get("isArray").equals("true")){
+                    return null;
+                }
+            }
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "main method has to receive an array of strings",
+                    null)
+            );
+        }
         return null;
     }
 

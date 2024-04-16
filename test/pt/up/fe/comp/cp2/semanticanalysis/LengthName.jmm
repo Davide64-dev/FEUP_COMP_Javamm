@@ -1,0 +1,20 @@
+import length;
+
+class length {
+
+    int length;
+
+    public int foo() {
+        int a;
+        int length;
+        length = a;
+        return 0;
+    }
+
+    public length length(length length) {
+        length a;
+        a = length;
+        return length;
+    }
+
+}
