@@ -55,6 +55,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 var passReports = analysisPass.analyze(rootNode, table);
                 reports.addAll(passReports);
                 i++;
+                if (!reports.isEmpty()) break;
             } catch (Exception e) {
                 System.out.println(e);
                 System.out.println("Unable to make Analysis Pass");
