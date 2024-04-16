@@ -31,18 +31,35 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(CONST, this::visitConst);
         addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(NEW_OBJECT, this::visitNewObject);
    
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirExprResult visitNewObject(JmmNode node, Void unused){
+
+        var typeName = node.getChild(0).get("name");
+
+        var tempVar = OptUtils.getTemp();
+
+        StringBuilder computation = new StringBuilder();
+
+        computation.append(tempVar).append(".").append(typeName).append(SPACE)
+                        .append(ASSIGN).append(".").append(typeName).append(" new(").append(typeName).append(")")
+                        .append(".").append(typeName).append(";\n");
+
+        computation.append("invokespecial(").append(tempVar).append(".").append(typeName).append(",\"<init>\").V;\n");
+        var code = tempVar + "." + typeName;
+        return new OllirExprResult(code,computation);
+        // temp_2.Simple :=.Simple new(Simple).Simple;
+        //invokespecial(temp_2.Simple,"<init>").V;
+        //s.Simple :=.Simple temp_2.Simple;
+
     }
 
     private OllirExprResult visitMethodCall(JmmNode node, Void unused){
 
         StringBuilder computation = new StringBuilder();
-        if (node.getKind().toString().equals("newObject")){
-            // invokespecial(temp_2.Simple,"<init>").V;
-            String code = "";
-            return new OllirExprResult(code);
-        }
 
         String methodName = node.get("name");
 
@@ -57,8 +74,15 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
             String code = tempVar + ollirType;
 
-            computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(this, \"" + methodName + "\")").append(ollirType).append(";\n");
+            //Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+            //String typeString = OptUtils.toOllirType(thisType);
 
+            if (node.get("is_this").equals("true"))
+                computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(this, \"" + methodName + "\")").append(ollirType).append(";\n");
+                // missing arguments to pass;
+            else
+                computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(").append(node.getChild(0).get("name"))
+                        .append(".").append("Simple").append(", \"" + methodName + "\")").append(ollirType).append(";\n");
             return new OllirExprResult(code,computation);
 
         }

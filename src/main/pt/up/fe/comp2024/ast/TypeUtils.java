@@ -48,7 +48,20 @@ public class TypeUtils {
 
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
+
+        var currentMethod = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("name");
+
+        for (var variable : table.getLocalVariables(currentMethod)){
+            if (variable.getName().equals(varRefExpr.get("name"))){
+                return variable.getType();
+            }
+        }
+
+        for (var variable : table.getFields()){
+            if (variable.getName().equals(varRefExpr.get("name"))){
+                return variable.getType();
+            }
+        }
         return new Type(INT_TYPE_NAME, false);
     }
 
