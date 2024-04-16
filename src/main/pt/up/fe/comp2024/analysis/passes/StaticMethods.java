@@ -37,7 +37,7 @@ public class StaticMethods extends AnalysisVisitor {
         }
 
         for (var field : table.getFields()){
-            if (field.equals(varExpr.get("name"))){
+            if (field.getName().equals(varExpr.get("name"))){
                 var message = "Can't use fields  on static methods";
                 addReport(Report.newError(
                         Stage.SEMANTIC,

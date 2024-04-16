@@ -1,0 +1,14 @@
+class ArrayAccessOnInt {
+
+    int temp;
+
+    public static void main(String[] args) {
+        temp = 0;
+    }
+
+    public int foo() {
+        int a;
+        a = 0;
+        return a;
+    }
+}
