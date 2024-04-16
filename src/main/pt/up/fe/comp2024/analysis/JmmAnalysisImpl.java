@@ -59,12 +59,17 @@ public class JmmAnalysisImpl implements JmmAnalysis {
             } catch (Exception e) {
                 System.out.println(e);
                 System.out.println("Unable to make Analysis Pass");
+
                 reports.add(Report.newError(Stage.SEMANTIC,
                         -1,
                         -1,
                         "Problem while executing analysis pass '" + analysisPass.getClass() + "'",
                         e)
                 );
+
+
+
+                System.out.println("--------Error--------\n");
             }
 
         }

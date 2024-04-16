@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -17,10 +18,37 @@ public class StaticMethods extends AnalysisVisitor {
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.THIS, this::visitThis);
+        addVisit(Kind.VAR_REF_EXPR, this::visitVar);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+        return null;
+    }
+
+    private Void visitVar(JmmNode varExpr, SymbolTable table){
+        var temp = varExpr.getAncestor(Kind.METHOD_DECL).get();
+        boolean isValid;
+        try {
+            if (temp.get("isStatic").equals("false")) {
+                return null;
+            }
+        } catch (NullPointerException e) {
+        }
+
+        for (var field : table.getFields()){
+            if (field.equals(varExpr.get("name"))){
+                var message = "Can't use fields  on static methods";
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(varExpr),
+                        NodeUtils.getColumn(varExpr),
+                        message,
+                        null)
+                );
+
+            }
+        }
         return null;
     }
 
