@@ -22,6 +22,12 @@ public class OllirTest {
     }
 
     @Test
+    public void compileBasic2() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/importsComplex.jmm", this::compileArithmetic);
+    }
+
+
+    @Test
     public void compileArithmetic() {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileArithmetic.jmm", this::compileArithmetic);
     }
@@ -35,6 +41,12 @@ public class OllirTest {
     @Test
     public void compileMethodInvocation1() {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/arithmeticComplexAddDiv.jmm",
+                this::compileArithmetic);
+    }
+
+    @Test
+    public void compileMethodInvocation2() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/arithmeticComplexAddSub.jmm",
                 this::compileArithmetic);
     }
 

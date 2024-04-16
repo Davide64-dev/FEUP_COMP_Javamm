@@ -1,3 +1,5 @@
+import temp.test1.complexImport;
+
 class CompileArithmetic {
 
     public static void main(String[] args) {
@@ -16,7 +18,7 @@ class CompileArithmetic {
         c = 3;
         d = c + 1;
         d = c + 2;
-        a = d - b;
+        a = d / b;
         return a + b;
     }
 }
