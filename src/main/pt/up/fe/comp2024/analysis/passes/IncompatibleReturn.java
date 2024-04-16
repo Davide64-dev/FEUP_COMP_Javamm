@@ -39,7 +39,18 @@ public class IncompatibleReturn extends AnalysisVisitor {
                     "main method has to receive an array of strings",
                     null)
             );
+
+            if (!method.getDescendants(Kind.THIS).isEmpty()){
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        "Cannot use this in main method",
+                        null)
+                );
+            }
         }
+
         return null;
     }
 
