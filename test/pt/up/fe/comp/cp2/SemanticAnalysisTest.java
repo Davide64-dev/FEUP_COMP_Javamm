@@ -214,6 +214,22 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void repeatedParams() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/RepeatedParams.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    @Test
+    public void repeatedImports() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/RepeatedImports.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
     /*
     @Test
     public void lengthNameOk() {

@@ -74,6 +74,42 @@ public class RepeatedNames extends AnalysisVisitor {
                     }
                 }
             }
+
+            var params = table.getParameters(method);
+
+            for (var j = 0; j < params.size(); j++){
+                for (var k = j + 1; k < params.size(); k++){
+                    if (params.get(j).getName().equals(params.get(k).getName())){
+                        var message = String.format("Parameter '%s' declared more than 1 time", params.get(i).getName());
+
+                        addReport(Report.newError(
+                                Stage.SEMANTIC,
+                                NodeUtils.getLine(program),
+                                NodeUtils.getColumn(program),
+                                message,
+                                null)
+                        );
+                    }
+                }
+            }
+        }
+
+        var imports = table.getImports();
+
+        for (int i = 0; i < imports.size(); i++){
+            for (int j = i + 1; j < imports.size(); j++){
+                if (imports.get(i).equals(imports.get(j))){
+                    var message = String.format("Import '%s' declared more than 1 time", imports.get(i));
+
+                    addReport(Report.newError(
+                            Stage.SEMANTIC,
+                            NodeUtils.getLine(program),
+                            NodeUtils.getColumn(program),
+                            message,
+                            null)
+                    );
+                }
+            }
         }
 
         return null;

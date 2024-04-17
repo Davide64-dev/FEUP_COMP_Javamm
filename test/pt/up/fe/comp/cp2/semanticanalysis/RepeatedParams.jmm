@@ -1,0 +1,15 @@
+class RepeatedParams {
+
+    int a;
+
+    public static void main(String[] args) {
+        int b;
+        b = 0;
+    }
+
+    public int foo(int b, int b) {
+        return b;
+    }
+}
+
+
