@@ -125,8 +125,8 @@ public class JasminGenerator {
 
         // imported object
         for (String importedClass : ollirResult.getOllirClass().getImports()) {
-            if (importedClass.endsWith(className)) {
-                return importedClass.replaceAll("\\.", "/");
+            if (importedClass.endsWith("." + className)) {
+                return importedClass.replaceAll(".", "/");
             }
         }
 
@@ -276,8 +276,8 @@ public class JasminGenerator {
         // get instruction
         // String className = currentMethod.getOllirClass().getClassName();
         String className = getFieldInstruction.getObject().getName().equals("this") ?
-                currentMethod.getOllirClass().getClassName() :
-                getFieldInstruction.getObject().getName();
+                getImportedClassName(currentMethod.getOllirClass().getClassName()) :
+                getImportedClassName(getFieldInstruction.getObject().getName());
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
         String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
@@ -325,7 +325,7 @@ public class JasminGenerator {
                 "%s%s %s/%s(%s)%s",
                 loadInstructions,
                 callInstruction.getInvocationType().toString(),
-                methodClassName,
+                getImportedClassName(methodClassName),
                 methodLiteral.getLiteral().replace("\"", ""),
                 arguments,
                 returnType
