@@ -265,6 +265,13 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String loadVariable(Element element) {
+        if (element instanceof Operand) return generateOperand((Operand) element);
+        if (element instanceof LiteralElement) return generateLiteral((LiteralElement) element);
+        // if (element instanceof ArrayOperand) return generateArrayOperand((ArrayOperand) element);
+        return null;
+    }
+
     private String generateCallInstruction(CallInstruction callInstruction) {
         var code = new StringBuilder();
 
@@ -289,18 +296,12 @@ public class JasminGenerator {
         StringBuilder loadInstructions = new StringBuilder();
         StringBuilder arguments = new StringBuilder();
         if (invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) {
-            for (var operand : callInstruction.getOperands()) {
-                if (operand instanceof Operand) {
-                    loadInstructions.append(generateOperand((Operand) operand));
-                }
-            }
+            loadInstructions.append(generators.apply(callInstruction.getCaller()));
         }
         for (var argument : callInstruction.getArguments()) {
             arguments.append(convertType(argument.getType()));
 
-            if (invocationType == CallType.invokevirtual) continue;
-
-            String op = generateOperand((Operand) argument);
+            String op = generators.apply(argument);
             loadInstructions.append(op);
         }
 
