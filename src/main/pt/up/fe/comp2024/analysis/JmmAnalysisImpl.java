@@ -31,7 +31,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new InvalidThis(),
                 new InvalidParameters(),
                 new MethodCallParameters(),
-                new IncompatibleReturn()
+                new IncompatibleReturn(),
+                new RepeatedNames()
                 );
 
     }
