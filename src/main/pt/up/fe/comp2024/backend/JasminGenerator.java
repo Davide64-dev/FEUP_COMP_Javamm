@@ -124,7 +124,7 @@ public class JasminGenerator {
             case BOOLEAN -> "Z";
             case VOID -> "V";
             case CLASS -> "L" + ollirType.toString() + ";";
-            case OBJECTREF -> "L" + ollirType.toString(); // not sure this is right
+            case OBJECTREF -> "L" + ollirType.toString() + ";"; // not sure this is right
             // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
