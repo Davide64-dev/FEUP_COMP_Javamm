@@ -229,7 +229,8 @@ public class JasminGenerator {
         var field = putFieldInstruction.getField();
 
         // load "this"
-        code.append("aload_0").append(NL);
+        // code.append("aload_0").append(NL);
+        code.append(putFieldInstruction.getObject());
 
         // push value
         // note: other instructions other than ldc exist, that may be more
@@ -253,7 +254,8 @@ public class JasminGenerator {
         var field = getFieldInstruction.getField();
 
         // load "this"
-        code.append("aload_0").append(NL);
+        // code.append("aload_0").append(NL);
+        code.append(generators.apply(getFieldInstruction.getObject()));
 
         // get instruction
         String className = currentMethod.getOllirClass().getClassName();
@@ -263,13 +265,6 @@ public class JasminGenerator {
         code.append(getInst).append(NL);
 
         return code.toString();
-    }
-
-    private String loadVariable(Element element) {
-        if (element instanceof Operand) return generateOperand((Operand) element);
-        if (element instanceof LiteralElement) return generateLiteral((LiteralElement) element);
-        // if (element instanceof ArrayOperand) return generateArrayOperand((ArrayOperand) element);
-        return null;
     }
 
     private String generateCallInstruction(CallInstruction callInstruction) {
