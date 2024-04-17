@@ -235,7 +235,7 @@ public class JasminGenerator {
         // push value
         // note: other instructions other than ldc exist, that may be more
         // efficient in different situations. But I don't think that's needed here
-        code.append(generateLiteral((LiteralElement) value));
+        code.append(generators.apply(value));
 
         // put instruction
         // this part seems ok for now
@@ -258,7 +258,10 @@ public class JasminGenerator {
         code.append(generators.apply(getFieldInstruction.getObject())).append(NL);
 
         // get instruction
-        String className = currentMethod.getOllirClass().getClassName();
+        // String className = currentMethod.getOllirClass().getClassName();
+        String className = getFieldInstruction.getObject().getName().equals("this") ?
+                currentMethod.getOllirClass().getClassName() :
+                getFieldInstruction.getObject().getName();
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
         String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
