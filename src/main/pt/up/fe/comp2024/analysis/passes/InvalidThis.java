@@ -14,17 +14,10 @@ import java.util.List;
 
 public class InvalidThis  extends AnalysisVisitor {
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor() {
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.THIS, this::visitThis);
-    }
-
-    private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("name");
-        return null;
+        System.out.println("Visitor Created");
+        addVisit(Kind.THIS_EXPR, this::visitThis);
     }
 
     private Void visitThis(JmmNode stmt, SymbolTable table) {
@@ -34,6 +27,18 @@ public class InvalidThis  extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
 
         var method = stmt.getAncestor(Kind.METHOD_DECL);
+
+        if (method.get().get("name").equals("main")){
+            var message = "This keyword cannot be used in main method";
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(stmt),
+                    NodeUtils.getColumn(stmt),
+                    message,
+                    null)
+            );
+        }
+
 
         if (method.isPresent() && method.get().get("isStatic").equals("true")){
             var message = "This keyword cannot be used in static methods";
