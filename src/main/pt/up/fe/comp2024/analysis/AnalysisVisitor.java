@@ -49,6 +49,7 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
     protected Type getVariableType(JmmNode variable, SymbolTable table, String currentMethod){
         System.out.println("Arithmetic Operation");
 
+
         // If the value is a variable
         if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
 
@@ -129,7 +130,6 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         if (variable.getKind().equals("ArrayAccess")){
             return new Type("int", false);
         }
-
 
         return new Type("", false);
     }

@@ -75,7 +75,7 @@ classDecl
     ;
 
 varDecl
-    : type name=(MAIN | ID) SEMI
+    : type name=(MAIN | LENGTH| ID) SEMI
     ;
 
 type locals[boolean isArray=false]
@@ -89,7 +89,7 @@ type locals[boolean isArray=false]
 
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})?
-        type name=ID
+        type name=(LENGTH | ID)
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})? STATIC {$isStatic=true;} type name=MAIN LPAREN param* RPAREN LCURLY

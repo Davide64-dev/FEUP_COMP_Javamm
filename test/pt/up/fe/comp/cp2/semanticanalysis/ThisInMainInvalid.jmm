@@ -1,0 +1,11 @@
+class ThisMainInvalid {
+
+    public static void main(String[] args) {
+        ThisMainInvalid a;
+        a = this;
+    }
+
+    public int foo(int a) {
+        return a;
+    }
+}

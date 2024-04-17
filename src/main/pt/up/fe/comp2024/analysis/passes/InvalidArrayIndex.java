@@ -38,58 +38,10 @@ public class InvalidArrayIndex extends AnalysisVisitor {
 
         var arrayAccess = arrayExpr.getChild(1);
 
-        if(ARITHMETIC_OPERATORS.contains(arrayAccess.getKind().toString())){
-            // It's an arithmetic operation. Already validated as true;
+        var type = getVariableType(arrayAccess, table, currentMethod);
+
+        if (!type.isArray() && type.getName().equals("int")){
             return null;
-        }
-
-        var debug = arrayAccess.getKind().toString();
-        if (arrayAccess.getKind().toString().equals("Const")){
-            if (arrayAccess.get("name") != "true" && arrayAccess.get("name") != "false"){
-                // It is a constant. It is valid;
-                return null;
-            }
-        }
-
-
-        // Check if the variable is an integer variable
-        for (var param : table.getFields()){
-            if (param.getName().equals(arrayAccess.get("name"))){
-                if (param.getType().getName().equals("int") && !param.getType().isArray()){
-                    return null;
-                }
-            }
-        }
-
-        for (var param : table.getParameters(currentMethod)){
-            if (param.getName().equals(arrayAccess.get("name"))) {
-                if (param.getType().getName().equals("int") && !param.getType().isArray()) {
-                    return null;
-                }
-                //if (param.getType().getName().equals("int"))
-            }
-        }
-
-        for (var param : table.getLocalVariables(currentMethod)){
-            if (param.getName().equals(arrayAccess.get("name"))) {
-                if (param.getType().getName().equals("int") && !param.getType().isArray()) {
-                    return null;
-                }
-            }
-        }
-
-
-        if (arrayExpr.getKind().equals(Kind.METHOD_CALL.toString())){
-            List<Symbol> methods =table.getFields();
-
-            for (var method : methods){
-                if (method.equals(arrayExpr.get("name"))){
-                    var returnType = table.getReturnType(method.getName());
-                    if (!returnType.isArray() && returnType.getName().equals("int")){
-                        return null;
-                    }
-                }
-            }
         }
 
         var message = String.format("'%s' is not a valid array access", arrayAccess.get("name"));
