@@ -190,6 +190,14 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void repeatedField() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/repeatedField.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
     /*
     @Test
     public void lengthNameOk() {
