@@ -58,6 +58,26 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
         System.out.println("Return stmt found");
 
+        if (assignExpr.getParent().getChildren(Kind.RET_STMT).size() > 1){
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignExpr),
+                    NodeUtils.getColumn(assignExpr),
+                    "Only one return statement is possible",
+                    null)
+            );
+        }
+
+        if (assignExpr.getParent().getChild(assignExpr.getParent().getChildren().size() - 1) != assignExpr){
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignExpr),
+                    NodeUtils.getColumn(assignExpr),
+                    "Return Statement must be the last one",
+                    null)
+            );
+        }
+
         var exprChild = assignExpr.getChild(0);
         var returnTypeActual = getVariableType(exprChild, table, currentMethod);
 
@@ -69,8 +89,6 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
         var message = String.format("Return types are not compatible");
 
-
-
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(assignExpr),
@@ -78,6 +96,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
                 message,
                 null)
         );
+
 
         return null;
     }
