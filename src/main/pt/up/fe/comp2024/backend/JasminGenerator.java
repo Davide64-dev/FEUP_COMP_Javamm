@@ -126,7 +126,7 @@ public class JasminGenerator {
         // imported object
         for (String importedClass : ollirResult.getOllirClass().getImports()) {
             if (importedClass.endsWith(className)) {
-                return importedClass;
+                return importedClass.replaceAll("\\.", "/");
             }
         }
 
