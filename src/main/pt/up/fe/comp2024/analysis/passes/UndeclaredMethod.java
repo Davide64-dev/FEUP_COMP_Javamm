@@ -35,6 +35,21 @@ public class UndeclaredMethod extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var methodRefName = methodRefExpr.get("name");
 
+        if (currentMethod.equals("main")){
+            if (methodRefExpr.get("is_this").equals("true")){
+
+
+
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(methodRefExpr),
+                        NodeUtils.getColumn(methodRefExpr),
+                        "This keyword cannot be used in main main method",
+                        null)
+                );
+            }
+        }
+
         // Var is a field, return
         if (table.getMethods().stream()
                 .anyMatch(method -> method.equals(methodRefName))) {
