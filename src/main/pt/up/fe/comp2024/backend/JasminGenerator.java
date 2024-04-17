@@ -118,13 +118,29 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String getImportedClassName(String className) {
+        // .this object
+        if (className.equals("this"))
+            return ollirResult.getOllirClass().getClassName();
+
+        // imported object
+        for (String importedClass : ollirResult.getOllirClass().getImports()) {
+            if (importedClass.endsWith(className)) {
+                return importedClass;
+            }
+        }
+
+        // default object name
+        return className;
+    }
+
     private String convertType(Type ollirType) {
         return switch (ollirType.getTypeOfElement()) {
             case INT32 -> "I";
             case BOOLEAN -> "Z";
             case VOID -> "V";
-            case CLASS -> "L" + ollirType.toString() + ";";
-            case OBJECTREF -> "L" + ollirType.toString() + ";"; // not sure this is right
+            case CLASS -> "L" + getImportedClassName(((ClassType) ollirType).getName()) + ";";
+            case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
             // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
