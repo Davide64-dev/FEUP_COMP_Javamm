@@ -230,7 +230,7 @@ public class JasminGenerator {
 
         // load "this"
         // code.append("aload_0").append(NL);
-        code.append(putFieldInstruction.getObject());
+        code.append(generators.apply(putFieldInstruction.getObject())).append(NL);
 
         // push value
         // note: other instructions other than ldc exist, that may be more
@@ -255,7 +255,7 @@ public class JasminGenerator {
 
         // load "this"
         // code.append("aload_0").append(NL);
-        code.append(generators.apply(getFieldInstruction.getObject()));
+        code.append(generators.apply(getFieldInstruction.getObject())).append(NL);
 
         // get instruction
         String className = currentMethod.getOllirClass().getClassName();
