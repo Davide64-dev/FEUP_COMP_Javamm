@@ -31,7 +31,6 @@ public class JasminGenerator {
 
     Method currentMethod;
     boolean needsPop = false;
-    boolean didInvoke = false;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -141,7 +140,7 @@ public class JasminGenerator {
             case INT32 -> "I";
             case BOOLEAN -> "Z";
             case VOID -> "V";
-            case CLASS -> "L" + getImportedClassName(((ClassType) ollirType).getName()) + ";";
+            case CLASS -> "L" + getImportedClassName(ollirType.toString()) + ";";
             case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
             // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
@@ -263,7 +262,6 @@ public class JasminGenerator {
             }
         ).append(reg).append(NL);
 
-
         return code.toString();
     }
 
@@ -284,7 +282,7 @@ public class JasminGenerator {
 
         // put instruction
         // this part seems ok for now
-        String className = currentMethod.getOllirClass().getClassName();
+        String className = getImportedClassName(currentMethod.getOllirClass().getClassName());
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
         String putInst = String.format("putfield %s/%s %s", className, fieldName, fieldType);
@@ -304,9 +302,10 @@ public class JasminGenerator {
 
         // get instruction
         // String className = currentMethod.getOllirClass().getClassName();
-        String className = getFieldInstruction.getObject().getName().equals("this") ?
-                getImportedClassName(currentMethod.getOllirClass().getClassName()) :
-                getImportedClassName(getFieldInstruction.getObject().getName());
+//        String className = getFieldInstruction.getObject().getName().equals("this") ?
+//                getImportedClassName(currentMethod.getOllirClass().getClassName()) :
+//                getImportedClassName(getFieldInstruction.getObject().getName());
+        String className = getImportedClassName(getFieldInstruction.getObject().getName());
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
         String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
@@ -319,10 +318,23 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         var invocationType = callInstruction.getInvocationType();
-        String methodClassName =
-                (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
-                ((ClassType) callInstruction.getCaller().getType()).getName() :
-                ((Operand) callInstruction.getCaller()).getName();
+//        String methodClassName =
+//                (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
+//                ((ClassType) callInstruction.getCaller().getType()).getName() :
+//                ((Operand) callInstruction.getCaller()).getName();
+        String methodClassName = "";
+        if (invocationType == CallType.NEW || invocationType == CallType.invokespecial) {
+            methodClassName = callInstruction.getCaller().getType().getTypeOfElement() == ElementType.THIS ?
+                    ((ClassType) callInstruction.getCaller().getType()).getName() :
+                    getImportedClassName(((ClassType) callInstruction.getCaller().getType()).getName());
+        } else if (invocationType == CallType.invokevirtual) {
+            methodClassName = getImportedClassName(((ClassType) callInstruction.getCaller().getType()).getName());
+        } else if (invocationType == CallType.invokestatic) {
+            methodClassName = callInstruction.getCaller().getType().getTypeOfElement() == ElementType.THIS ?
+                    ((ClassType) callInstruction.getCaller().getType()).getName() :
+                    getImportedClassName(((Operand) callInstruction.getCaller()).getName());
+        }
+
         String inst;
 
         if (invocationType == CallType.NEW) {
@@ -360,7 +372,6 @@ public class JasminGenerator {
         );
         code.append(inst).append(NL);
 
-        // if (invocationType == CallType.invokespecial) {
         if (needsPop) {
             code.append("pop").append(NL);
             needsPop = false;
