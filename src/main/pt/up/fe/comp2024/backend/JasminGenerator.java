@@ -31,6 +31,7 @@ public class JasminGenerator {
 
     Method currentMethod;
     boolean needsPop = false;
+    boolean didInvoke = false;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -195,6 +196,17 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
+            // if an invoke virtual or invoke static instruction is being called
+            // from here, it will need pop, since that means it's not in an assignment
+            // (IFF it is not void, aka doesn't return anything)
+            if (inst instanceof CallInstruction) {
+                var invType = ((CallInstruction) inst).getInvocationType();
+                if (invType == CallType.invokevirtual || invType == CallType.invokestatic) {
+                    if (((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) {
+                        needsPop = true;
+                    }
+                }
+            }
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
@@ -211,6 +223,21 @@ public class JasminGenerator {
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
+        // if right hand side of the expression is a call instruction,
+        // and if it is an invokevirtual or static, we don't need pop,
+        // since it's in an assignment
+        // we will need pop if it's NOT an assignment. An example of this
+        // would be:
+        // foo(), where foo() returns an integer, but we're not storing anything
+        // in this case we will need to pop
+        // but if generateCallInstruction is being called from here, that means
+        // the call instruction is part of an assignment, and therefore doesn't need pop
+        if (assign.getRhs() instanceof CallInstruction) {
+            var invType = ((CallInstruction) assign.getRhs()).getInvocationType();
+            if (invType == CallType.invokevirtual || invType == CallType.invokestatic) {
+                needsPop = false;
+            }
+        }
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
@@ -232,9 +259,10 @@ public class JasminGenerator {
             switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
                 case OBJECTREF -> "astore ";
-                default -> "error ";
+                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             }
         ).append(reg).append(NL);
+
 
         return code.toString();
     }
