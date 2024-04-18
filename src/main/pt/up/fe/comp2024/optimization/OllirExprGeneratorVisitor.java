@@ -102,7 +102,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 var parametersWithType = new ArrayList<String>();
                 for (var parameter : parameters){
                     var par = visit(parameter);
-                    if (!par.getComputation().isEmpty()) computation.append(par.getComputation()).append(";\n");
+                    if (!par.getComputation().isEmpty()) computation.append(par.getComputation());
                     parametersWithType.add(par.getCode());
                 }
 

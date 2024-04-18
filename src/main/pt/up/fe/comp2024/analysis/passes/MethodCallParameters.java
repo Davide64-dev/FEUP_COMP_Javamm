@@ -50,7 +50,9 @@ public class MethodCallParameters extends AnalysisVisitor {
             if (method.equals(methodRefName)) inTable = true;
         }
 
-        if (!inTable) return null;
+        if (!inTable){
+            return null;
+        }
 
         var callParams = methodRefExpr.getChildren(Kind.EXPR);
 
