@@ -30,6 +30,7 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    boolean needsPop = false;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -293,9 +294,7 @@ public class JasminGenerator {
         String methodClassName =
                 (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
                 ((ClassType) callInstruction.getCaller().getType()).getName() :
-                ((Operand) callInstruction.getCaller()).getName(); // this should be ok now
-                // ...it isn't :/
-                // but maybe now it is?? I think??...
+                ((Operand) callInstruction.getCaller()).getName();
         String inst;
 
         if (invocationType == CallType.NEW) {
@@ -303,6 +302,7 @@ public class JasminGenerator {
             code.append(inst).append(NL);
             code.append("dup");
             code.append(NL);
+            needsPop = true;
             return code.toString();
         }
 
@@ -332,8 +332,10 @@ public class JasminGenerator {
         );
         code.append(inst).append(NL);
 
-        if (invocationType == CallType.invokespecial) {
+        // if (invocationType == CallType.invokespecial) {
+        if (needsPop) {
             code.append("pop").append(NL);
+            needsPop = false;
         }
 
         return code.toString();
