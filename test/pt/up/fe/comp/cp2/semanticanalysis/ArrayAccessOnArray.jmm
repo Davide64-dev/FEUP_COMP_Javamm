@@ -1,0 +1,15 @@
+class ArrayAccessOnArray {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo() {
+        int[] a;
+        int[] b;
+        a = [1,2,3,4,5];
+        b = [10,9,8,7,6];
+
+        return b[a[3]];
+    }
+}
