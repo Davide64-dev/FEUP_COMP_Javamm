@@ -30,6 +30,8 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    boolean needsPop = false;
+    boolean didInvoke = false;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -118,13 +120,29 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String getImportedClassName(String className) {
+        // .this object
+        if (className.equals("this"))
+            return ollirResult.getOllirClass().getClassName();
+
+        // imported object
+        for (String importedClass : ollirResult.getOllirClass().getImports()) {
+            if (importedClass.endsWith("." + className)) {
+                return importedClass.replaceAll(".", "/");
+            }
+        }
+
+        // default object name
+        return className;
+    }
+
     private String convertType(Type ollirType) {
         return switch (ollirType.getTypeOfElement()) {
             case INT32 -> "I";
             case BOOLEAN -> "Z";
             case VOID -> "V";
-            case CLASS -> "L" + ollirType.toString() + ";";
-            case OBJECTREF -> "L" + ollirType.toString(); // not sure this is right
+            case CLASS -> "L" + getImportedClassName(((ClassType) ollirType).getName()) + ";";
+            case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
             // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
@@ -178,6 +196,17 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
+            // if an invoke virtual or invoke static instruction is being called
+            // from here, it will need pop, since that means it's not in an assignment
+            // (IFF it is not void, aka doesn't return anything)
+            if (inst instanceof CallInstruction) {
+                var invType = ((CallInstruction) inst).getInvocationType();
+                if (invType == CallType.invokevirtual || invType == CallType.invokestatic) {
+                    if (((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) {
+                        needsPop = true;
+                    }
+                }
+            }
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
@@ -194,6 +223,21 @@ public class JasminGenerator {
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
+        // if right hand side of the expression is a call instruction,
+        // and if it is an invokevirtual or static, we don't need pop,
+        // since it's in an assignment
+        // we will need pop if it's NOT an assignment. An example of this
+        // would be:
+        // foo(), where foo() returns an integer, but we're not storing anything
+        // in this case we will need to pop
+        // but if generateCallInstruction is being called from here, that means
+        // the call instruction is part of an assignment, and therefore doesn't need pop
+        if (assign.getRhs() instanceof CallInstruction) {
+            var invType = ((CallInstruction) assign.getRhs()).getInvocationType();
+            if (invType == CallType.invokevirtual || invType == CallType.invokestatic) {
+                needsPop = false;
+            }
+        }
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
@@ -215,9 +259,10 @@ public class JasminGenerator {
             switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
                 case OBJECTREF -> "astore ";
-                default -> "error ";
+                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             }
         ).append(reg).append(NL);
+
 
         return code.toString();
     }
@@ -229,12 +274,13 @@ public class JasminGenerator {
         var field = putFieldInstruction.getField();
 
         // load "this"
-        code.append("aload_0").append(NL);
+        // code.append("aload_0").append(NL);
+        code.append(generators.apply(putFieldInstruction.getObject())).append(NL);
 
         // push value
         // note: other instructions other than ldc exist, that may be more
         // efficient in different situations. But I don't think that's needed here
-        code.append(generateLiteral((LiteralElement) value));
+        code.append(generators.apply(value));
 
         // put instruction
         // this part seems ok for now
@@ -253,10 +299,14 @@ public class JasminGenerator {
         var field = getFieldInstruction.getField();
 
         // load "this"
-        code.append("aload_0").append(NL);
+        // code.append("aload_0").append(NL);
+        code.append(generators.apply(getFieldInstruction.getObject())).append(NL);
 
         // get instruction
-        String className = currentMethod.getOllirClass().getClassName();
+        // String className = currentMethod.getOllirClass().getClassName();
+        String className = getFieldInstruction.getObject().getName().equals("this") ?
+                getImportedClassName(currentMethod.getOllirClass().getClassName()) :
+                getImportedClassName(getFieldInstruction.getObject().getName());
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
         String getInst = String.format("getfield %s/%s %s", className, fieldName, fieldType);
@@ -272,9 +322,7 @@ public class JasminGenerator {
         String methodClassName =
                 (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
                 ((ClassType) callInstruction.getCaller().getType()).getName() :
-                ((Operand) callInstruction.getCaller()).getName(); // this should be ok now
-                // ...it isn't :/
-                // but maybe now it is?? I think??...
+                ((Operand) callInstruction.getCaller()).getName();
         String inst;
 
         if (invocationType == CallType.NEW) {
@@ -282,6 +330,7 @@ public class JasminGenerator {
             code.append(inst).append(NL);
             code.append("dup");
             code.append(NL);
+            needsPop = true;
             return code.toString();
         }
 
@@ -289,18 +338,12 @@ public class JasminGenerator {
         StringBuilder loadInstructions = new StringBuilder();
         StringBuilder arguments = new StringBuilder();
         if (invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) {
-            for (var operand : callInstruction.getOperands()) {
-                if (operand instanceof Operand) {
-                    loadInstructions.append(generateOperand((Operand) operand));
-                }
-            }
+            loadInstructions.append(generators.apply(callInstruction.getCaller()));
         }
         for (var argument : callInstruction.getArguments()) {
             arguments.append(convertType(argument.getType()));
 
-            if (invocationType == CallType.invokevirtual) continue;
-
-            String op = generateOperand((Operand) argument);
+            String op = generators.apply(argument);
             loadInstructions.append(op);
         }
 
@@ -310,15 +353,17 @@ public class JasminGenerator {
                 "%s%s %s/%s(%s)%s",
                 loadInstructions,
                 callInstruction.getInvocationType().toString(),
-                methodClassName,
+                getImportedClassName(methodClassName),
                 methodLiteral.getLiteral().replace("\"", ""),
                 arguments,
                 returnType
         );
         code.append(inst).append(NL);
 
-        if (invocationType == CallType.invokespecial) {
+        // if (invocationType == CallType.invokespecial) {
+        if (needsPop) {
             code.append("pop").append(NL);
+            needsPop = false;
         }
 
         return code.toString();
