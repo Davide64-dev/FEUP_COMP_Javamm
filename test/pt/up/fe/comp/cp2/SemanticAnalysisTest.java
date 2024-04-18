@@ -254,6 +254,14 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void arrayLengthIsInteger() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitLength.jmm"));
+        TestUtils.noErrors(result);
+        System.out.println(result.getReports());
+    }
+
     /*
     @Test
     public void lengthNameOk() {

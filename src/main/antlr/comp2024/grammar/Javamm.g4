@@ -123,7 +123,7 @@ expr locals[boolean isVirtual=false, boolean ignore_first=false, boolean is_this
     | NOT expr #notOp
     | LPAREN expr RPAREN #parantheses
     | expr LSPAREN expr RSPAREN #arrayAccess
-    | expr DOT LENGTH #objectVar
+    | expr DOT LENGTH #length
     | THIS DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$isVirtual=true; $ignore_first=true;$is_this=true;} #methodCall
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$ignore_first=true;} #methodCall
     | name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
