@@ -127,7 +127,7 @@ public class JasminGenerator {
         // imported object
         for (String importedClass : ollirResult.getOllirClass().getImports()) {
             if (importedClass.endsWith("." + className)) {
-                return importedClass.replaceAll(".", "/");
+                return importedClass.replace(".", "/");
             }
         }
 
@@ -359,14 +359,15 @@ public class JasminGenerator {
             loadInstructions.append(op);
         }
 
-        LiteralElement methodLiteral = (LiteralElement) callInstruction.getMethodName();
+        String methodName = ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
+        if (invocationType == CallType.invokespecial) methodName = "<init>";
         String returnType = convertType(callInstruction.getReturnType());
         inst = String.format(
                 "%s%s %s/%s(%s)%s",
                 loadInstructions,
                 callInstruction.getInvocationType().toString(),
                 getImportedClassName(methodClassName),
-                methodLiteral.getLiteral().replace("\"", ""),
+                methodName,
                 arguments,
                 returnType
         );
