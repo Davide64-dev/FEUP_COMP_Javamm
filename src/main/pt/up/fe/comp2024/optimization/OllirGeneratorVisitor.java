@@ -153,7 +153,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
 
-    private String visitMethodCall(JmmNode node, Void s){
+    private String visitMethodCall(JmmNode node, Void s) {
         StringBuilder functionaCall = new StringBuilder();
         String name = node.get("name");
         String object = node.getChild(0).get("name");
@@ -261,7 +261,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(OptUtils.toOllirType(retType));
         code.append(SPACE);
 
-        code.append(expr.getCode());
+        switch (expr.getCode()) {
+            case "trueboolean":
+                code.append("1.bool");
+                break;
+            case "falseboolean":
+                code.append("0.bool");
+                break;
+        }
+
+        var atuamaede4 = expr.getCode();
 
         code.append(END_STMT);
 
