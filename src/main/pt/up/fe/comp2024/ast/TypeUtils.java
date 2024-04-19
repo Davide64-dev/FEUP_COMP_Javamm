@@ -65,7 +65,6 @@ public class TypeUtils {
         return new Type(INT_TYPE_NAME, false);
     }
 
-
     /**
      * @param sourceType
      * @param destinationType
