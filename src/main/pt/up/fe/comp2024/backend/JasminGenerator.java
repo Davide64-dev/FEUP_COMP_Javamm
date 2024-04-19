@@ -170,7 +170,7 @@ public class JasminGenerator {
                 "";
 
         // var staticModifier = method.isStaticMethod() ? " static " : "";
-        var staticModifier = methodName.equals("main") ? " static " : "";
+        var staticModifier = methodName.equals("main") ? " static " : ""; // not sure which version to use
 
         // Add access modifier, static modifier and method name
         code.append("\n.method ").append(modifier).append(staticModifier).append(methodName).append("(");
