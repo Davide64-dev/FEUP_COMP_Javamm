@@ -138,10 +138,10 @@ public class JasminGenerator {
             case INT32 -> "I";
             case BOOLEAN -> "Z";
             case VOID -> "V";
+            case STRING -> "Ljava/lang/String;";
             case CLASS -> "L" + getImportedClassName(ollirType.toString()) + ";";
             case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
-            case STRING -> "Ljava/lang/String;";
-            // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
+            case ARRAYREF -> "[" + convertType(((ArrayType) ollirType));
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
     }
