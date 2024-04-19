@@ -268,9 +268,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             case "falseboolean":
                 code.append("0.bool");
                 break;
+            default:
+                code.append(expr.getCode());
         }
-
-        var atuamaede4 = expr.getCode();
 
         code.append(END_STMT);
 
