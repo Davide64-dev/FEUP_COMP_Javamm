@@ -51,7 +51,27 @@ public class MethodCallParameters extends AnalysisVisitor {
         }
 
         if (!inTable){
-            return null;
+
+            var objectOrStaticValue = methodRefExpr.getChild(0);
+
+            var type = getVariableType(objectOrStaticValue, table, currentMethod);
+
+            if (type.getName().isEmpty()){
+                var name = objectOrStaticValue.get("name").substring(1, type.getName().length() - 2);
+                for (var importStmt : table.getImports()){
+                    var importStmtName = importStmt.substring(1, importStmt.length() - 2);
+                    if (importStmtName.equals(name)){
+                        return null;
+                    }
+                }
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(methodRefExpr),
+                        NodeUtils.getColumn(methodRefExpr),
+                        "Need to import class",
+                        null)
+                );
+            }
         }
 
         var callParams = methodRefExpr.getChildren(Kind.EXPR);
