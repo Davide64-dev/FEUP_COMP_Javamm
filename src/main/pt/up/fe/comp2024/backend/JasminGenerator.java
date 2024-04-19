@@ -140,8 +140,8 @@ public class JasminGenerator {
             case VOID -> "V";
             case STRING -> "Ljava/lang/String;";
             case CLASS -> "L" + getImportedClassName(ollirType.toString()) + ";";
-            case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
-            case ARRAYREF -> "[" + convertType(((ArrayType) ollirType));
+            case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName()) + ";";
+            case ARRAYREF -> "[" + convertType(((ArrayType) ollirType).getElementType());
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
         };
     }
@@ -169,7 +169,8 @@ public class JasminGenerator {
                 method.getMethodAccessModifier().name().toLowerCase() + " " :
                 "";
 
-        var staticModifier = method.isStaticMethod() ? " static " : "";
+        // var staticModifier = method.isStaticMethod() ? " static " : "";
+        var staticModifier = methodName.equals("main") ? " static" : "";
 
         // Add access modifier, static modifier and method name
         code.append("\n.method ").append(modifier).append(staticModifier).append(methodName).append("(");
