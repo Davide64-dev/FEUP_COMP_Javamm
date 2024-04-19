@@ -159,15 +159,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String object = node.getChild(0).get("name");
 
         String invokeType;
-        if (node.toString().contains("isVirtual: true")) {
+        if (node.get("isVirtual").equals("true")) {
             invokeType = "invokevirtual";
         } else {
             invokeType = "invokestatic";
         }
-        // functionCall.append(invokeType).append("(").append(object).append(", \"").append(name).append("\"");
-        functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
-        // var methodName = node.getAncestor(CLASS_DECL).get().get("name");
+        functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
         try {
             for (int i = 1; i < node.getNumChildren(); i++) {

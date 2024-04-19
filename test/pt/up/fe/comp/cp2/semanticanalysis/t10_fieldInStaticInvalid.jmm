@@ -1,0 +1,50 @@
+import io.lol;
+import kk.lol.a;
+import B;
+
+class Varargs {
+    int f;
+    int e;
+    int d;
+    String m;
+    // int e;
+    int... z;
+
+    public static void main(String[] args) {
+            int[] b;
+            int[] a;
+            int c;
+            // int... z;
+            a = [1, 2, 3];
+            b = [10, 20];
+            // int b;
+
+            c = a[0] + b[0];
+
+            // b = this.varargs(10,20,30);
+    }
+
+    public int[] foo() {
+        int a;
+        String y;
+        y = this;
+        //a = this.varargs(y, 20, 10, 20, 30);
+        return this.lol();
+    }
+
+    // public String foo() {
+    //    String a;
+    //    return a;
+    // }
+
+    public int[] lol(){
+        int[] g;
+        int k;
+        k = 0;
+        k = this.d;
+        g = [1,2,3];
+        return g;
+    }
+
+
+}

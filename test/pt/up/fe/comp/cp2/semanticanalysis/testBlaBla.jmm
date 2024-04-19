@@ -1,0 +1,59 @@
+class ArrayInit {
+    int[] l;
+
+    public int[] foo() {
+        int[] a;
+        int b;
+        String y;
+        boolean p;
+        //a = xy.length;
+        a = new int[l.length];
+        a = new int[a.length];
+        a[4] = [1,2,3].length;
+        b = a.length;
+        b = [].length;
+        b = (this.lol()).length;
+        b = l.length;
+        return a;
+    }
+
+    public int[] lol() {
+        int[] xy;
+        return [1,2,3];
+    }
+
+    public int bar() {
+        int[] c;
+        int d;
+        c = new int[5];
+        d = c.length;
+        return (this.qux()).length;
+    }
+
+    public int[] baz(int[] array) {
+        int e;
+        e = array.length;
+        return array;
+    }
+
+    public int[] qux() {
+        int[] f;
+        int g;
+        f = this.lol();
+        g = f.length;
+        return f;
+    }
+
+    public int[] quux() {
+        int[] h;
+        int i;
+        h = [1, 2, 3, 4, 5];
+        i = h.length;
+        return h;
+    }
+
+
+
+
+
+}

@@ -13,6 +13,7 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class InvalidAssign extends AnalysisVisitor {
 
@@ -74,7 +75,22 @@ public class InvalidAssign extends AnalysisVisitor {
         var assigned = assignExpr.getChild(0);
         var assignee = assignExpr.getChild(1);
 
-        if (!assigned.getKind().equals(Kind.VAR_REF_EXPR.toString())){
+        if (assigned.getKind().equals("ArrayAccess")) {
+            var type = getVariableType(assignee, table, currentMethod);
+            int a = 1;
+            if (Objects.equals(type.getName(), "int")) {
+                return null;
+            } else {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assignExpr),
+                        NodeUtils.getColumn(assignExpr),
+                        "trying to access array with non integer",
+                        null
+                        )
+                );
+            }
+        } else if (!assigned.getKind().equals(Kind.VAR_REF_EXPR.toString())){
             var message = String.format("'%s' is not a variable", assigned.get("name"));
 
             addReport(Report.newError(

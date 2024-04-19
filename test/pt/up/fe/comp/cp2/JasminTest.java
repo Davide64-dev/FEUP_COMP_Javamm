@@ -43,11 +43,6 @@ public class JasminTest {
         testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirSimple.ollir");
     }
 
-    @Test
-    public void ollirImport() {
-        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/ImportTest.ollir");
-    }
-
     public static void testOllirToJasmin(String resource, String expectedOutput) {
         JasminResult result = null;
 

@@ -41,7 +41,9 @@ public class MethodCallParameters extends AnalysisVisitor {
         List<Symbol> methodParams;
         try {
             methodParams = table.getParameters(methodRefName);
-        } catch(NullPointerException e){ return null;}
+        } catch(NullPointerException e) {
+            return null;
+        }
 
         var methods = table.getMethods();
 
@@ -84,7 +86,7 @@ public class MethodCallParameters extends AnalysisVisitor {
         }
 
 
-        if (methodParams.size() == 0 && callParams.size() == 0){
+        if (methodParams.size() == 0 && callParams.size() == 0) {
             // both have only one parameter
             return null;
         }
@@ -95,9 +97,9 @@ public class MethodCallParameters extends AnalysisVisitor {
                 System.out.println("It has varargs");
                 return null;
             }
-        } catch (IndexOutOfBoundsException e){}
+        } catch (IndexOutOfBoundsException e) { }
 
-        if (methodParams.size() != callParams.size()){
+        if (methodParams.size() != callParams.size()) {
             var message = "The number of parameters are not the same";
             addReport(Report.newError(
                     Stage.SEMANTIC,
@@ -118,13 +120,11 @@ public class MethodCallParameters extends AnalysisVisitor {
                 if (expected.isArray() == actual.isArray()){
                     // same type, must return;
                     continue;
-                }
-                else{
+                } else {
                     alright = false;
                     break;
                 }
-            }
-            else{
+            } else {
                 alright = false;
                 break;
             }
@@ -132,13 +132,9 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         if (alright) return null;
 
-
-
         // Create error report
         System.out.println("There was an error");
         var message = String.format("Argumets do are not compatible", methodRefName);
-
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
@@ -147,8 +143,6 @@ public class MethodCallParameters extends AnalysisVisitor {
                 message,
                 null)
         );
-
-
 
         return null;
     }

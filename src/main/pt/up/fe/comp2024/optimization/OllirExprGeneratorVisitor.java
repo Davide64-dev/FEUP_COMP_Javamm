@@ -80,10 +80,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
             String code = tempVar + ollirType;
 
-            if (node.get("is_this").equals("true"))
-                computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(this, \"" + methodName + "\")").append(ollirType).append(";\n");
+            if (node.get("is_this").equals("true")) {
+                computation.append(tempVar).append(ollirType)
+                        .append(SPACE).append(ASSIGN).append(SPACE)
+                        .append(ollirType).append(SPACE).append("invokevirtual(this, \"")
+                        .append(methodName).append("\")")
+                        .append(ollirType).append(";\n");
                 // missing arguments to pass;
-            else {
+            } else {
                 Type typeObject = new Type("", false);
                 for (var variable : table.getFields()) {
                     if (variable.getName().equals(node.getChild(0).get("name"))) {
@@ -106,7 +110,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                     parametersWithType.add(par.getCode());
                 }
 
-                computation.append(tempVar).append(ollirType).append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE).append("invokevirtual(").append(node.getChild(0).get("name"))
+                computation.append(tempVar).append(ollirType)
+                        .append(SPACE).append(ASSIGN).append(SPACE).append(ollirType).append(SPACE)
+                        .append("invokevirtual(").append(node.getChild(0).get("name"))
                         .append(".").append(typeObject.getName()).append(", \"" + methodName + "\"");
 
                 for (var parameter : parametersWithType){
@@ -115,8 +121,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
                 computation.append(")").append(ollirType).append(";\n");
             }
-            return new OllirExprResult(code,computation);
 
+            return new OllirExprResult(code, computation);
         }
 
         for (var field : table.getFields()){
@@ -125,13 +131,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 return new OllirExprResult("code");
             }
         }
+
         for (var varia : table.getLocalVariables(methodName)){
             if (varia.getName().equals(node.getChild(0).get("name"))) {
                 computation.append("code");
                 return new OllirExprResult("code");
             }
         }
-
 
         return null;
     }

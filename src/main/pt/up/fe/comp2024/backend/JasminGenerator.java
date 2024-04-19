@@ -120,8 +120,9 @@ public class JasminGenerator {
     }
 
     private String getImportedClassName(String className) {
-        if (className.equals("this"))
+        if (className.equals("this")) {
             return ollirResult.getOllirClass().getClassName();
+        }
 
         for (String importedClass : ollirResult.getOllirClass().getImports()) {
             if (importedClass.endsWith("." + className)) {
@@ -129,7 +130,6 @@ public class JasminGenerator {
             }
         }
 
-        // default object name
         return className;
     }
 

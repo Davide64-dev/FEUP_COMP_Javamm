@@ -1,0 +1,20 @@
+import io;
+
+class A {
+    int a;
+
+    public int x(){
+        //int[] b;
+        int a;
+        a = 10;
+        a = [1,2,3][0];
+        io.print(a);
+        return a;
+    }
+ 
+    public static void main(String[] args){
+        A a;
+        a = new A();
+        a.x();
+    }
+}
