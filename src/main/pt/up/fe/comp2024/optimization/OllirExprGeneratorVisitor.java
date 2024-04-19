@@ -67,68 +67,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         StringBuilder computation = new StringBuilder();
         String methodName = node.get("name");
-        StringBuilder parameters = new StringBuilder();
-        var args = node.getChildren();
-        var t = args.remove(0);
 
-        for (var arg : args) {
-            var result = visit(arg);
-            computation.append(result.getComputation());
-            parameters.append(", ").append(result.getCode());
-        }
-
-        var tResult = visit(t);
-        computation.append(tResult.getComputation());
-
-        boolean isVirtual = false;
-        if (VAR_REF_EXPR.check(t)) {
-            if (t.getObject("isVirtual").equals("true")) {
-                isVirtual = true;
-            }
-        }
-
-        var isImported = (boolean) node.getObject("isTargetAImport");
-
-        String code;
-        String type = null;
-        if (!isImported) {
-            type = OptUtils.toOllirType(TypeUtils.getExprType(node, table));
-        }
-
-        if (type == null) {
-            var parent = node.getParent();
-            if (ASSIGN_STMT.check(parent)) {
-                type = OptUtils.toOllirType(TypeUtils.getExprType(parent, table));
-            } else {
-                type = ".V";
-            }
-        }
-
-        if (!type.equals(".V")) {
-            String temp = OptUtils.getTemp();
-            computation.append(temp).append(type).append(SPACE).append(ASSIGN).append(type).append(SPACE);
-            code = temp + type;
-        } else {
-            code = " ";
-        }
-
-        if (isVirtual) {
-            computation.append("invokevirtual(");
-        } else {
-            computation.append("invokestatic(");
-        }
-
-        computation.append(tResult.getCode())
-                .append(", \"")
-                .append(methodName)
-                .append("\"")
-                .append(parameters)
-                .append(")")
-                .append(type)
-                .append(END_STMT);
-
-        return new OllirExprResult(code, computation.toString());
-        /* if (node.get("ignore_first").equals("true")){
+        if (node.get("ignore_first").equals("true")){
             // normal method
 
             var tempVar = OptUtils.getTemp();
@@ -198,7 +138,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             }
         }
 
-        return null; */
+        return null;
     }
 
     private OllirExprResult visitConst(JmmNode node, Void unused) {
