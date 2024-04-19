@@ -120,11 +120,9 @@ public class JasminGenerator {
     }
 
     private String getImportedClassName(String className) {
-        // .this object
         if (className.equals("this"))
             return ollirResult.getOllirClass().getClassName();
 
-        // imported object
         for (String importedClass : ollirResult.getOllirClass().getImports()) {
             if (importedClass.endsWith("." + className)) {
                 return importedClass.replace(".", "/");
@@ -140,7 +138,7 @@ public class JasminGenerator {
             case INT32 -> "I";
             case BOOLEAN -> "Z";
             case VOID -> "V";
-            case CLASS -> "L" + getImportedClassName(ollirType.toString()) + ";";
+            case CLASS, STRING -> "L" + getImportedClassName(ollirType.toString()) + ";";
             case OBJECTREF -> "L" + getImportedClassName(((ClassType) ollirType).getName());
             // case ARRAYREF -> "[" + ... to be implemented in the next checkpoint
             default -> throw new NotImplementedException(ollirType.getTypeOfElement());
@@ -360,7 +358,7 @@ public class JasminGenerator {
         }
 
         String methodName = ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
-        if (invocationType == CallType.invokespecial) methodName = "<init>";
+        if (invocationType == CallType.invokespecial) methodName = "<init>"; // I'm not sure if invokespecial is always a constructor but this works for now
         String returnType = convertType(callInstruction.getReturnType());
         inst = String.format(
                 "%s%s %s/%s(%s)%s",
