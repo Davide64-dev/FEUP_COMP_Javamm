@@ -1,12 +1,17 @@
-import a.b.C;
-import d.e.F;
-import g.h.i.j.k.l.m.n.o.p.q.r.s.t.u.v.w.x.y.Zigma;
+class CallToMethodAssumedInImport{
 
-class Abc extends Zigma {
+    int yourmom;
 
-    public boolean f(boolean b){
+    public static void main(String[] args) {
+
+    }
+
+    public boolean salam(boolean b){
         return b;
     }
 
-    public static void main(String[] args) { }
+    public boolean foo(boolean b) {
+        b = this.salam(this.foo(true));
+        return true;
+    }
 }

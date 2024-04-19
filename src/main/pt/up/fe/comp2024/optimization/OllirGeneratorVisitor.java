@@ -154,13 +154,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitMethodCall(JmmNode node, Void s) {
-        StringBuilder functionaCall = new StringBuilder();
+        StringBuilder functionCall = new StringBuilder();
         String name = node.get("name");
         String object = node.getChild(0).get("name");
 
-        functionaCall.append("invokestatic(").append(object).append(", \"").append(name).append("\"");
+        String invokeType;
+        if (node.toString().contains("isVirtual: true")) {
+            invokeType = "invokevirtual";
+        } else {
+            invokeType = "invokestatic";
+        }
+        // functionCall.append(invokeType).append("(").append(object).append(", \"").append(name).append("\"");
+        functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
-        var methodName = node.getAncestor(CLASS_DECL).get().get("name");
+        // var methodName = node.getAncestor(CLASS_DECL).get().get("name");
 
         try {
             for (int i = 1; i < node.getNumChildren(); i++) {
@@ -169,16 +176,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 // need to get argument type
                 //var argumentType = this.getVariableType(node.getChild(i), methodName);
 
-                functionaCall.append(",").append(temp.getCode());
+                functionCall.append(",").append(temp.getCode());
 
             }
         } catch (NullPointerException e) {}
 
-        functionaCall.append(")");
+        functionCall.append(")");
 
-        functionaCall.append(".V;").append(NL);
+        functionCall.append(".V;").append(NL);
 
-        return functionaCall.toString();
+        return functionCall.toString();
     }
 
     private String visitImpDecl(JmmNode node, Void s) {
