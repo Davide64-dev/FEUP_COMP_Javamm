@@ -1,4 +1,6 @@
-class a{
+import a.b.C;
+class Abc {
+    public static void main(String[] args) {
 
-
+    }
 }

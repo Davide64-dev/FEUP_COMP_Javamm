@@ -53,7 +53,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                         .append(ASSIGN).append(".").append(typeName).append(" new(").append(typeName).append(")")
                         .append(".").append(typeName).append(";\n");
 
-        //invokespecial(temp_2.Simple,"<init>").V;
+        // invokespecial(temp_2.Simple,"<init>").V;
         computation.append("invokespecial(").append(tempVar).append(".").append(typeName).append(",\"<init>\").V;\n");
 
         //s.Simple :=.Simple temp_2.Simple;
