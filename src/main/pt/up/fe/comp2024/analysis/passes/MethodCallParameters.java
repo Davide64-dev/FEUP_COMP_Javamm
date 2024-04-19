@@ -85,7 +85,6 @@ public class MethodCallParameters extends AnalysisVisitor {
             callParams = callParams1;
         }
 
-
         if (methodParams.size() == 0 && callParams.size() == 0) {
             // both have only one parameter
             return null;

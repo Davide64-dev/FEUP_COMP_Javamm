@@ -312,7 +312,7 @@ public class SemanticAnalysisTest {
     }
 
     @Test
-    public void xtreme(){
+    public void blahblah(){
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/testBlaBla.jmm"));
         TestUtils.noErrors(result);
     }
