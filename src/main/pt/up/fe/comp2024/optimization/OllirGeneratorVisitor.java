@@ -181,34 +181,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return functionaCall.toString();
     }
 
-    private String visitImpDecl(JmmNode node, Void s) { //Imports
+    private String visitImpDecl(JmmNode node, Void s) {
         StringBuilder importStmt = new StringBuilder();
-        /* String qualifiedImport = node.get("lib")
+        String qualifiedImport = node.get("lib")
                 .replaceAll("\\[", "")
                 .replaceAll("]", "")
                 .replaceAll(",", ".")
                 .replaceAll(" ", "");
 
         importStmt.append("import ").append(qualifiedImport).append(";\n");
-        return importStmt.toString(); */
-
-        for(var imp : table.getImports()){
-            if(imp.contains(node.get("ID"))){
-                StringBuilder import_str = new StringBuilder();
-                System.out.println(node.get("lib").toString());
-                for(var i = 0; i < node.get("lib").toString().length(); i++){
-                    if(node.get("lib").charAt(i) != ',' && node.get("lib").charAt(i) != '[' && node.get("lib").charAt(i) != ']' && node.get("lib").charAt(i) != ' '){
-                        import_str.append(node.get("lib").charAt(i));
-                    }
-                    else if(node.get("lib").charAt(i) == ','){
-                        import_str.append(".");
-                    }
-                }
-                System.out.println(import_str);
-                importStmt.append("import ").append(import_str).append(";").append(NL);
-            }
-        }
-
         return importStmt.toString();
     }
 
