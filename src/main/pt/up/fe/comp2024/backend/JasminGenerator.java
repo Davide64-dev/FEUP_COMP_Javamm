@@ -54,6 +54,8 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(CallInstruction.class, this::generateCallInstruction);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCondInstruction);
+        generators.put(GotoInstruction.class, this::generateGotoInstruction);
     }
 
     public List<Report> getReports() {
@@ -300,11 +302,6 @@ public class JasminGenerator {
         // code.append("aload_0").append(NL);
         code.append(generators.apply(getFieldInstruction.getObject())).append(NL);
 
-        // get instruction
-        // String className = currentMethod.getOllirClass().getClassName();
-//        String className = getFieldInstruction.getObject().getName().equals("this") ?
-//                getImportedClassName(currentMethod.getOllirClass().getClassName()) :
-//                getImportedClassName(getFieldInstruction.getObject().getName());
         String className = getImportedClassName(getFieldInstruction.getObject().getName());
         String fieldName = field.getName();
         String fieldType = convertType(field.getType());
@@ -318,10 +315,6 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         var invocationType = callInstruction.getInvocationType();
-//        String methodClassName =
-//                (invocationType == CallType.NEW || invocationType == CallType.invokespecial || invocationType == CallType.invokevirtual) ?
-//                ((ClassType) callInstruction.getCaller().getType()).getName() :
-//                ((Operand) callInstruction.getCaller()).getName();
         String methodClassName = "";
         if (invocationType == CallType.NEW || invocationType == CallType.invokespecial) {
             methodClassName = callInstruction.getCaller().getType().getTypeOfElement() == ElementType.THIS ?
@@ -385,6 +378,18 @@ public class JasminGenerator {
         return generators.apply(singleOp.getSingleOperand());
     }
 
+    private String generateSingleOpCondInstruction(SingleOpCondInstruction singleOpCondInstruction) {
+        StringBuilder code = new StringBuilder();
+
+        return code.toString();
+    }
+
+    private String generateGotoInstruction(GotoInstruction gotoInstruction) {
+        StringBuilder code = new StringBuilder();
+
+        return code.toString();
+    }
+
     private String generateLiteral(LiteralElement literal) {
         return "ldc " + literal.getLiteral() + NL;
     }
@@ -411,10 +416,13 @@ public class JasminGenerator {
 
         // apply operation
         var op = switch (binaryOp.getOperation().getOpType()) {
+            // arithmetic
             case ADD -> "iadd";
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
+            // boolean
+            // case LTH ->
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 

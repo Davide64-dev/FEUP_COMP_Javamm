@@ -1,0 +1,17 @@
+import ioPlus;
+
+HelloWorld extends Object {
+
+    .method public static main(args.array.String).V {
+        if(0.bool) goto if_then_0;
+        invokestatic(ioPlus, "printHelloWorld").V;
+        goto if_end_0;
+        if_then_0:
+        if_end_0:
+        ret.V ;
+    }
+
+    .construct HelloWorld().V {
+        invokespecial(this, "").V;
+    }
+}
