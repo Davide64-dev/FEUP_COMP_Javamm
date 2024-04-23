@@ -41,92 +41,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         exprVisitor = new OllirExprGeneratorVisitor(table);
     }
 
-    protected Type getVariableType(JmmNode variable, String currentMethod){
-        System.out.println("Arithmetic Operation");
-
-        // If the value is a variable
-        if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
-
-            if (this.table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-
-                for (var symbol : this.table.getFields()){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-            }
-
-            if (this.table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-
-                for (var symbol : this.table.getParameters(currentMethod)){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-                return null;
-            }
-
-            if (this.table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(variable.get("name")))) {
-
-                List<Symbol> symbols = this.table.getLocalVariables(currentMethod);
-
-                for (var symbol : symbols){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-            }
-
-        }
-
-        // If the value is const
-        if (variable.getKind().equals(Kind.CONST.toString())){
-            if (variable.get("name").equals("true") || variable.get("name").equals("false")){
-                return new Type("boolean", false);
-            }
-            else{
-                return new Type("int", false);
-            }
-        }
-
-        // If the value is another node
-        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
-            var operator = variable.getChild(1);
-            if (ARITHMETIC_OPERATORS.contains(operator.get("name")) && !operator.get("name").equals("<")){
-                return new Type("int", false);
-            }
-
-            else{
-                return new Type("boolean", false);
-            }
-
-        }
-
-        // If the variable is a function
-        if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
-            var methods =this.table.getMethods();
-
-            for (var method : methods){
-                if (method.equals(variable.get("name"))){
-                    return this.table.getReturnType(method);
-                }
-            }
-        }
-
-        if (variable.getKind().equals(Kind.NEW_OBJECT.toString())){
-            var type = variable.getChild(0);
-            return new Type(type.get("name"), false);
-        }
-
-
-        return new Type("", false);
-    }
-
-
-
     @Override
     protected void buildVisitor() {
 
@@ -389,14 +303,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         for (var child : node.getChildren()) {
             var result = visit(child);
-
+            /*
             if (METHOD_DECL.check(child) && needNl) {
                 code.append(NL);
                 needNl = false;
             }
+            */
+
 
             code.append(result);
         }
+
+        code.append(NL);
 
         code.append(buildConstructor());
         code.append(R_BRACKET);

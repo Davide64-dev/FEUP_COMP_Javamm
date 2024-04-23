@@ -22,14 +22,13 @@ public class OllirTest {
     }
 
     @Test
-    public void compileBasic2() {
-        testJmmCompilation("pt/up/fe/comp/cp2/ollir/importsComplex.jmm", this::compileArithmetic);
-    }
-
-
-    @Test
     public void compileArithmetic() {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileArithmetic.jmm", this::compileArithmetic);
+    }
+
+    @Test
+    public void compileImportsComplex() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/importsComplex.jmm", this::compileMethodInvocation);
     }
 
     @Test
@@ -200,4 +199,6 @@ public class OllirTest {
         assertEquals("Assignment does not have the expected type", ElementType.INT32,
                 assignInst.get().getTypeOfAssign().getTypeOfElement());
     }
+
+
 }
