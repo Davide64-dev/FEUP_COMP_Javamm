@@ -13,7 +13,7 @@ class CompileMethodInvocation {
     public int foo(int c, int p) {
         int a;
 
-        a = 1;
+        a = 1 + c * p - 5;
 
         io.println(a);
 
