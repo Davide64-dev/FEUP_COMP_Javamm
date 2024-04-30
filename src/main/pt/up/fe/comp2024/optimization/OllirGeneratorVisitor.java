@@ -69,8 +69,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitMethodCall(JmmNode node, Void s) {
         StringBuilder functionCall = new StringBuilder();
+
         String name = node.get("name");
-        String object = node.getChild(0).get("name");
+        String object = "this"; // Default to "this" if it's a method call on the current object
+
+        // Check if the method call is on an object other than "this"
+        if (!node.get("is_this").equals("true")) {
+            object = node.getChild(0).get("name");
+        }
 
         String invokeType;
         if (node.get("isVirtual").equals("true")) {
@@ -79,23 +85,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             invokeType = "invokestatic";
         }
 
+        // Append the method invocation to the functionCall StringBuilder
         functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
         try {
+            // Append method arguments if available
             for (int i = 1; i < node.getNumChildren(); i++) {
-                String argument = node.getChild(i).get("name");
-                var temp = exprVisitor.visit(node.getChild(i));
+                JmmNode argumentNode = node.getChild(i);
+                String argumentName = argumentNode.get("name");
+                var temp = exprVisitor.visit(argumentNode);
                 // need to get argument type
-                //var argumentType = this.getVariableType(node.getChild(i), methodName);
-
                 functionCall.append(",").append(temp.getCode());
-
             }
         } catch (NullPointerException e) {}
 
-        functionCall.append(")");
-
-        functionCall.append(".V;").append(NL);
+        // Append the closing parenthesis and return type
+        functionCall.append(")").append(".V;").append(NL);
 
         return functionCall.toString();
     }
