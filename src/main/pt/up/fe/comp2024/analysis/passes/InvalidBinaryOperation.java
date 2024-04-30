@@ -39,7 +39,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
 
         var leftOperand = binaryRefExpr.getChild(0);
 
-        var rightOperand = binaryRefExpr.getChild(2);
+        var rightOperand = binaryRefExpr.getChild(1);
 
 
         var leftType = getVariableType(leftOperand, table, currentMethod);
