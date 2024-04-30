@@ -100,8 +100,8 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
 
         // If the value is another node
         if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
-            var operator = variable.getChild(1);
-            if (ARITHMETIC_OPERATORS.contains(operator.get("name")) && !operator.get("name").equals("<")){
+            var operator = variable.get("name");
+            if (ARITHMETIC_OPERATORS.contains(operator) && !operator.equals("<")){
                 return new Type("int", false);
             }
 

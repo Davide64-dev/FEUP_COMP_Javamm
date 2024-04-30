@@ -74,8 +74,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder functionCall = new StringBuilder();
 
         String name = node.get("name");
-        String object = "this";
 
+        String object = "this"; // Default to "this" if it's a method call on the current object
+
+        // Check if the method call is on an object other than "this"
         if (!node.get("is_this").equals("true")) {
             object = node.getChild(0).get("name");
         }
@@ -88,9 +90,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
 
+        // Append the method invocation to the functionCall StringBuilder
         functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
         try {
+            // Append method arguments if available
             for (int i = 1; i < node.getNumChildren(); i++) {
                 JmmNode argumentNode = node.getChild(i);
                 String argumentName = argumentNode.get("name");
@@ -100,6 +104,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         } catch (NullPointerException e) {}
 
+
+        // Append the closing parenthesis and return type
         functionCall.append(")").append(".V;").append(NL);
 
         return functionCall.toString();
@@ -136,6 +142,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitAssignStmt(JmmNode node, Void unused) {
+
+        System.out.println(node);
 
         var lhs = exprVisitor.visit(node.getJmmChild(0));
         var rhs = exprVisitor.visit(node.getJmmChild(1));

@@ -158,7 +158,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
 
         var lhs = visit(node.getJmmChild(0));
-        var rhs = visit(node.getJmmChild(2));
+        var rhs = visit(node.getJmmChild(1));
 
         StringBuilder computation = new StringBuilder();
 
@@ -176,7 +176,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 .append(lhs.getCode()).append(SPACE);
 
         Type type = TypeUtils.getExprType(node, table);
-        computation.append(node.getChild(1).get("name")).append(OptUtils.toOllirType(type)).append(SPACE)
+        computation.append(node.get("name")).append(OptUtils.toOllirType(type)).append(SPACE)
                 .append(rhs.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
