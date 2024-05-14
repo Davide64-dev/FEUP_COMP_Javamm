@@ -110,16 +110,13 @@ stmt
     ;
 
 binaryOp
-    : name=AND
-    | name=OR
-    | name=MUL
-    | name=DIV
-    | name=ADD
-    | name=MINUS
-    | name=LESS;
+    : name='&&' | name='||' | name='<' | name='+' | name='-' | name='*' | name='/';
+
 
 expr locals[boolean isVirtual=false, boolean ignore_first=false, boolean is_this=false]
-    : expr binaryOp expr #binaryExpr
+    : expr name=('&&' | '<') expr #binaryExpr
+    | expr name=('*' | '/') expr #binaryExpr
+    | expr name=('+' | '-') expr #binaryExpr
     | NOT expr #notOp
     | LPAREN expr RPAREN #parantheses
     | expr LSPAREN expr RSPAREN #arrayAccess

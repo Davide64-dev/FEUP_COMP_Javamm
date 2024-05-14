@@ -37,10 +37,11 @@ public class TypeUtils {
     private static Type getBinExprType(JmmNode binaryExpr) {
         // TODO: Simple implementation that needs to be expanded
 
-        String operator = binaryExpr.getChild(1).get("name");
+        String operator = binaryExpr.get("name");
 
         return switch (operator) {
             case "+", "*", "/", "-" -> new Type(INT_TYPE_NAME, false);
+            case "<", "||", "&&" -> new Type("boolean", false);
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
