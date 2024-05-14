@@ -306,19 +306,19 @@ public class JasminGenerator {
     private String generateCallInstruction(CallInstruction callInstruction) {
         var code = new StringBuilder();
 
-        // refactor this code
         var invocationType = callInstruction.getInvocationType();
+        var typeOfElement = callInstruction.getCaller().getType().getTypeOfElement();
         String methodClassName = switch (invocationType) {
+            case invokevirtual -> convertImport(((ClassType) callInstruction.getCaller().getType()).getName());
             case NEW, invokespecial -> {
-                if (callInstruction.getCaller().getType().getTypeOfElement() == ElementType.THIS) {
+                if (typeOfElement == ElementType.THIS) {
                     yield ((ClassType) callInstruction.getCaller().getType()).getName();
                 } else {
                     yield convertImport(((ClassType) callInstruction.getCaller().getType()).getName());
                 }
             }
-            case invokevirtual -> convertImport(((ClassType) callInstruction.getCaller().getType()).getName());
             case invokestatic -> {
-                if (callInstruction.getCaller().getType().getTypeOfElement() == ElementType.THIS) {
+                if (typeOfElement == ElementType.THIS) {
                     yield ((ClassType) callInstruction.getCaller().getType()).getName();
                 } else {
                     yield convertImport(((Operand) callInstruction.getCaller()).getName());
