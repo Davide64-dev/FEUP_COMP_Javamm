@@ -49,6 +49,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RET_STMT, this::visitRetStmt);
+        addVisit(IF_STMT, this::visitIfStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(IMPORT_DECLARATION, this::visitImpDecl);
         addVisit(VAR_DECL, this::visitVarDecl);
@@ -56,6 +57,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(NEW_OBJECT, this::visitNewObject);
         setDefaultVisit(this::defaultVisit);
     }
+
+
 
 
     private String visitNewObject(JmmNode node, Void s){
@@ -71,6 +74,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder functionCall = new StringBuilder();
 
         String name = node.get("name");
+
         String object = "this"; // Default to "this" if it's a method call on the current object
 
         // Check if the method call is on an object other than "this"
@@ -85,6 +89,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             invokeType = "invokestatic";
         }
 
+
         // Append the method invocation to the functionCall StringBuilder
         functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
@@ -98,6 +103,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 functionCall.append(",").append(temp.getCode());
             }
         } catch (NullPointerException e) {}
+
 
         // Append the closing parenthesis and return type
         functionCall.append(")").append(".V;").append(NL);
@@ -199,6 +205,36 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         code.append(END_STMT);
+
+        return code.toString();
+    }
+    private String visitIfStmt(JmmNode node, Void unused) {
+
+        String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+        Type retType = table.getReturnType(methodName);
+        int labelCounter = 0;
+
+        StringBuilder code = new StringBuilder();
+
+        var expr = OllirExprResult.EMPTY;
+
+        if (node.getNumChildren() > 0) {
+            expr = exprVisitor.visit(node.getJmmChild(0));
+        }
+        code.append(expr.getComputation());
+
+        String labelThen = "L" + labelCounter++;
+        String labelEnd = "L" + labelCounter++;
+
+        code.append("if (").append(expr.getCode()).append(") goto ").append(labelThen).append(";\n");
+        code.append("goto ").append(labelEnd).append(";\n");
+        code.append(labelThen).append(":\n");
+
+        if (node.getNumChildren() > 1) {
+            code.append(visit(node.getJmmChild(1), unused));
+        }
+
+        code.append(labelEnd).append(":\n");
 
         return code.toString();
     }
