@@ -29,7 +29,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+", "<");
 
-    public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||");
+    public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||", "!");
 
 
     private final SymbolTable table;
@@ -50,15 +50,28 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RET_STMT, this::visitRetStmt);
         addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(IMPORT_DECLARATION, this::visitImpDecl);
         addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_OBJECT, this::visitNewObject);
+        addVisit(ARRAY_CALL, this:: visitArrayCall);
+        addVisit(ARRAY_ACCESS, this:: visitArrayAccess);
         setDefaultVisit(this::defaultVisit);
     }
 
+    private String visitArrayAccess(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
 
+        return code.toString();
+    }
+
+    private String visitArrayCall(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        return code.toString();
+    }
 
 
     private String visitNewObject(JmmNode node, Void s){
@@ -152,6 +165,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute the children
         code.append(lhs.getComputation());
+        //TODO: for the test: Arithmetic_and
+        // here the only different thing is instead of
+        // tmp1.bool := .bool invokevirtual(&&., "p", 1.i32).bool; it should be
+        // invokevirtual(c.Arithmetic_and, "p", 1.i32).bool;
+        // the only error i find is in the computation and idk how to change that
         code.append(rhs.getComputation());
 
         // code to compute self
@@ -176,7 +194,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitRetStmt(JmmNode node, Void unused) {
-
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
 
@@ -209,12 +226,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
     private String visitIfStmt(JmmNode node, Void unused) {
-
+        //pernaei ta if else opote asto gia tora
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
-        int labelCounter = 0;
 
         StringBuilder code = new StringBuilder();
+
+        int labelCounter = 1;
 
         var expr = OllirExprResult.EMPTY;
 
@@ -223,18 +241,56 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
         code.append(expr.getComputation());
 
-        String labelThen = "L" + labelCounter++;
-        String labelEnd = "L" + labelCounter++;
+        //allaje ta onomata ton string
+        String trueLabel = "if" + labelCounter;
+        String falseLabel = "endif" + labelCounter;
 
-        code.append("if (").append(expr.getCode()).append(") goto ").append(labelThen).append(";\n");
-        code.append("goto ").append(labelEnd).append(";\n");
-        code.append(labelThen).append(":\n");
+        code.append("if (").append(expr.getCode()).append(") goto ").append(trueLabel).append(";\n");
+        //des pos to ekanes sto param stmt kai kanot analoga
+        var childCode = visit(node.getChild(2));
+        code.append(childCode);
+        code.append("goto ").append(falseLabel).append(";\n");
+        //to idio kai edo
+        //tou if code
+        code.append(trueLabel).append(":\n");
 
         if (node.getNumChildren() > 1) {
             code.append(visit(node.getJmmChild(1), unused));
         }
 
-        code.append(labelEnd).append(":\n");
+        code.append(falseLabel).append(":\n");
+
+        return code.toString();
+        //meta otan to kaneis gia ena if logika tha xreiastei na to kaneis kai gia polla auto einai gia to switch stat
+    }
+    private String visitWhileStmt(JmmNode node, Void unused) {
+        //Passes the test but i should show whats inside the while as well
+        String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+        Type retType = table.getReturnType(methodName);
+
+        StringBuilder code = new StringBuilder();
+        var expr = OllirExprResult.EMPTY;
+
+        String conditionlabel = "whileCond";
+        String trueLabel = "WhileLoop" ;
+        String falseLabel = "WhileEnd" ;
+
+        code.append(conditionlabel).append(":\n");
+
+        if (node.getNumChildren() > 0) {
+            expr = exprVisitor.visit(node.getJmmChild(0));
+        }
+        code.append(expr.getComputation());
+
+        code.append("if (").append(expr.getCode()).append(") goto ").append(trueLabel).append(";\n");
+        code.append("goto ").append(falseLabel).append(";\n");
+
+        code.append(trueLabel).append(":\n");
+        if (node.getNumChildren() > 1) {
+            code.append(visit(node.getJmmChild(1), unused));
+        }
+        code.append("goto ").append(conditionlabel).append(";\n");
+        code.append(falseLabel).append(":\n");
 
         return code.toString();
     }
@@ -248,9 +304,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(id);
-        if (isArray.equals("true")){
-            code.append(".array");
-        }
 
         code.append(typeCode);
 

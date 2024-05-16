@@ -32,6 +32,7 @@ public class Cpf3_Ollir {
     /*checks if method declaration is correct (array)*/
     @Test
     public void section1_Basic_Method_Declaration_Array() {
+        //TODO:This is done but its not passing because of invoke error
         var result = getOllirResult("basic/BasicMethodsArray.jmm");
 
         var method = CpUtils.getMethod(result, "func4");
@@ -77,7 +78,7 @@ public class Cpf3_Ollir {
     @Test
     public void section2_Arithmetic_not() {
         var ollirResult = getOllirResult("arithmetic/Arithmetic_not.jmm");
-
+        //xreiazetai mono ena !.bool
         var method = CpUtils.getMethod(ollirResult, "main");
 
         CpUtils.assertNumberOfOperations(OperationType.NOTB, 1, method, ollirResult);
