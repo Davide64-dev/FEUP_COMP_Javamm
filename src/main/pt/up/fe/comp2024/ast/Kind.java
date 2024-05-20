@@ -33,6 +33,8 @@ public enum Kind {
 
     EXPR,
 
+    NEW_ARRAY,
+
     THIS_EXPR;
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RET_STMT);

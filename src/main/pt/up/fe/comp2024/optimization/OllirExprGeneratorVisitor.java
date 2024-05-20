@@ -35,9 +35,47 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(CONST, this::visitConst);
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_OBJECT, this::visitNewObject);
-   
+        addVisit(NEW_ARRAY, this::visitNewArray);
+
         setDefaultVisit(this::defaultVisit);
     }
+
+    private OllirExprResult visitNewArray(JmmNode node, Void unused){
+        var typeName = node.getChild(0).get("name");
+
+        var tempVar = OptUtils.getTemp();
+
+        StringBuilder computation = new StringBuilder();
+
+        // TODO: add the compuation
+        // temp_2.Simple :=.Simple new(Simple).Simple;
+        /*
+        computation.append(tempVar).append(".").append(typeName).append(SPACE)
+                        .append(ASSIGN).append(".").append(typeName).append(" new(").append(typeName).append(")")
+                        .append(".").append(typeName).append(";\n");
+
+        // invokespecial(temp_2.Simple,"<init>").V;
+        computation.append("invokespecial(").append(tempVar).append(".").append(typeName).append(",\"<init>\").V;\n");
+         */
+
+        //s.Simple :=.Simple temp_2.Simple;
+        StringBuilder code = new StringBuilder();
+        code.append("new (array" );
+
+        for (int i = 1; i < node.getNumChildren(); i++){
+            code.append(", ");
+
+            var temp = visit(node.getChild(i));
+            computation.append(temp.getComputation());
+            code.append(temp.getCode());
+        }
+
+        // TODO change .i32 from hard coded
+        code.append(").array.i32");
+
+        return new OllirExprResult(code.toString(),computation.toString());
+    }
+
 
     private OllirExprResult visitNewObject(JmmNode node, Void unused){
 
