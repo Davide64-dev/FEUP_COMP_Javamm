@@ -53,15 +53,6 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         // If the value is a variable
         if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
 
-            if (table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
-
-                for (var symbol : table.getFields()){
-                    if (symbol.getName().equals(variable.get("name"))){
-                        return symbol.getType();
-                    }
-                }
-            }
 
             if (table.getParameters(currentMethod).stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
@@ -80,6 +71,16 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
                 List<Symbol> symbols =table.getLocalVariables(currentMethod);
 
                 for (var symbol : symbols){
+                    if (symbol.getName().equals(variable.get("name"))){
+                        return symbol.getType();
+                    }
+                }
+            }
+
+            if (table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(variable.get("name")))) {
+
+                for (var symbol : table.getFields()){
                     if (symbol.getName().equals(variable.get("name"))){
                         return symbol.getType();
                     }
