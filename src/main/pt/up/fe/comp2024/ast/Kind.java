@@ -22,6 +22,8 @@ public enum Kind {
     CONST,
     ARRAY_ACCESS,
     WHILE_STMT,
+
+    LENGTH,
     IF_STMT,
     THIS,
     IMPORT_DECLARATION,

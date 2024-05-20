@@ -36,8 +36,50 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_OBJECT, this::visitNewObject);
         addVisit(NEW_ARRAY, this::visitNewArray);
+        addVisit(ARRAY_ACCESS, this::visitArrayAcess);
+        addVisit(LENGTH, this::visitLength);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirExprResult visitLength(JmmNode node, Void unused){
+        StringBuilder computation = new StringBuilder();
+        var array = node.getChild(0);
+        var arrayData = visit(array);
+        var tempVar = OptUtils.getTemp();
+        computation.append(arrayData.getComputation());
+
+        computation.append(tempVar).append(".i32").append(" := .i32 arraylength(").append(arrayData.getCode()).append(")").append(".i32;\n");
+
+        var code = tempVar + ".i32";
+
+        return new OllirExprResult(code, computation);
+
+    }
+
+    private OllirExprResult visitArrayAcess(JmmNode node, Void unused){
+
+        StringBuilder computation = new StringBuilder();
+
+        var array = node.getChild(0);
+        var index = node.getChild(1);
+
+        var arrayData = visit(array);
+        var indexData = visit(index);
+        var tempVar = OptUtils.getTemp();
+
+        computation.append(arrayData.getComputation());
+        computation.append(indexData.getComputation());
+
+        var type = ".i32";
+        int count = 1;
+
+        computation.append(tempVar).append(type).append(" ").append(ASSIGN).append(" ").append(type).append(" $")
+                    .append(count).append(".").append(arrayData.getCode().split("\\.")[0]).append("[").append(indexData.getCode().split("\\.")[0])
+                    .append(type).append("]").append(type).append(";\n");
+
+        var code = tempVar + type;
+        return new OllirExprResult(code,computation);
     }
 
     private OllirExprResult visitNewArray(JmmNode node, Void unused){

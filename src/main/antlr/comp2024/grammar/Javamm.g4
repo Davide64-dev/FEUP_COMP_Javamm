@@ -114,18 +114,18 @@ binaryOp
 
 
 expr locals[boolean isVirtual=false, boolean ignore_first=false, boolean is_this=false]
-    : expr name=('&&' | '<') expr #binaryExpr
-    | expr name=('*' | '/') expr #binaryExpr
-    | expr name=('+' | '-') expr #binaryExpr
+    : LPAREN expr RPAREN #parantheses
     | NOT expr #notOp
-    | LPAREN expr RPAREN #parantheses
-    | expr LSPAREN expr RSPAREN #arrayAccess
     | expr DOT LENGTH #length
     | THIS DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$isVirtual=true; $ignore_first=true;$is_this=true;} #methodCall
     | expr DOT name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN {$ignore_first=true;} #methodCall
     | name=ID LPAREN ( expr ( COMMA expr )* )? RPAREN #methodCall
     | NEW type LPAREN (expr (COMMA expr)*)? RPAREN #newObject
     | NEW type LSPAREN (expr (COMMA expr)*)? RSPAREN #newArray
+    | expr LSPAREN expr RSPAREN #arrayAccess
+    | expr name=('*' | '/') expr #binaryExpr
+    | expr name=('+' | '-') expr #binaryExpr
+    | expr name=('&&' | '<') expr #binaryExpr
     | LSPAREN (expr (COMMA expr)*)? RSPAREN #arrayCall
     | name=TRUE #const
     | name=FALSE #const
@@ -133,6 +133,7 @@ expr locals[boolean isVirtual=false, boolean ignore_first=false, boolean is_this
     | name=INTEGER #const
     | name=THIS #thisExpr
     ;
+
 
 
 

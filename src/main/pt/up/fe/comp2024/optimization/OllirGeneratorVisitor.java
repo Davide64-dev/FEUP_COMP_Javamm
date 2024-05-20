@@ -103,14 +103,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
 
+        for (int i = 1; i < node.getNumChildren(); i++) {
+            JmmNode argumentNode = node.getChild(i);
+            var temp = exprVisitor.visit(argumentNode);
+            // need to get argument type
+            functionCall.append(temp.getComputation());
+        }
         // Append the method invocation to the functionCall StringBuilder
         functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
         try {
             // Append method arguments if available
+
             for (int i = 1; i < node.getNumChildren(); i++) {
                 JmmNode argumentNode = node.getChild(i);
-                String argumentName = argumentNode.get("name");
                 var temp = exprVisitor.visit(argumentNode);
                 // need to get argument type
                 functionCall.append(",").append(temp.getCode());
@@ -162,6 +168,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var rhs = exprVisitor.visit(node.getJmmChild(1));
 
         StringBuilder code = new StringBuilder();
+
+        if (node.getJmmChild(0).getKind().equals(ARRAY_ACCESS.toString())){
+
+
+            code.append(rhs.getComputation());
+            System.out.println("Have to write to the array");
+            code.append("$1.").append(node.getJmmChild(0).getJmmChild(0).get("name")).append("[").append(lhs.getCode()).append(".i32")
+                    .append("]").append(".i32");
+
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(SPACE);
+            code.append(".i32");
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            code.append(";\n");
+            return code.toString();
+        }
 
         // code to compute the children
         code.append(lhs.getComputation());
