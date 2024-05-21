@@ -116,8 +116,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         computation.append(child.getComputation());
 
-        // TODO: change the 5 from hard coded
-        computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(5).append(".i32).array.i32;\n");
+        var length = visit(node.getChild(1));
+
+        computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(length.getCode()).append(").array.i32;\n");
 
         return new OllirExprResult(tempVar,computation);
     }
