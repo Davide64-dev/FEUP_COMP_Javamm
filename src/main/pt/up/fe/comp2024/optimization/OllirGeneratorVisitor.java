@@ -56,9 +56,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_OBJECT, this::visitNewObject);
-        addVisit(ARRAY_CALL, this:: visitArrayCall);
         addVisit(ARRAY_ACCESS, this:: visitArrayAccess);
         addVisit(PAR_STMT, this:: visitParStmt);
+        addVisit(NEW_ARRAY, this::visitNewArray);
+        setDefaultVisit(this::defaultVisit);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -70,6 +71,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
+
+
+
+    private String visitNewArray(JmmNode node, Void unused){
+        StringBuilder code = new StringBuilder();
+        return code.toString();
+    }
+
+
+
 
     private String visitArrayAccess(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();

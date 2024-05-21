@@ -39,7 +39,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(ARRAY_ACCESS, this::visitArrayAcess);
         addVisit(LENGTH, this::visitLength);
         addVisit(NOT_OP, this::visitNotOp);
-
+        addVisit(ARRAY_CALL, this::visitArrayCall);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -51,6 +51,26 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         var code = "!.bool " + computation;
         return new OllirExprResult(code, computation);
+    }
+    private OllirExprResult visitArrayCall(JmmNode node, Void unused){
+        var typeName = node.getChild(0).get("name");
+
+        var tempVar = OptUtils.getTemp();
+
+        StringBuilder computation = new StringBuilder();
+
+        computation.append(tempVar).append(".array.i32 ").append(" := .array.i32 new (array,").append(node.getNumChildren()).append(".i32).array.i32;\n");
+
+        for (int i = 0; i < node.getNumChildren(); i++){
+
+            var nodeComputation = visit(node.getChild(0));
+
+            computation.append(nodeComputation.getComputation());
+
+            computation.append(tempVar).append("[").append(i).append(".i32].i32 := .i32 ").append(nodeComputation.getCode()).append(";\n");
+        }
+
+        return new OllirExprResult(tempVar + ".i32", computation);
     }
 
     private OllirExprResult visitLength(JmmNode node, Void unused){
@@ -94,39 +114,21 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitNewArray(JmmNode node, Void unused){
-        var typeName = node.getChild(0).get("name");
+
+        // .array.i32 new(array, 5.i32).array.i32;
 
         var tempVar = OptUtils.getTemp();
 
         StringBuilder computation = new StringBuilder();
 
-        // TODO: add the compuation
-        // temp_2.Simple :=.Simple new(Simple).Simple;
-        /*
-        computation.append(tempVar).append(".").append(typeName).append(SPACE)
-                        .append(ASSIGN).append(".").append(typeName).append(" new(").append(typeName).append(")")
-                        .append(".").append(typeName).append(";\n");
+        var child = visit(node.getChild(0));
 
-        // invokespecial(temp_2.Simple,"<init>").V;
-        computation.append("invokespecial(").append(tempVar).append(".").append(typeName).append(",\"<init>\").V;\n");
-         */
+        computation.append(child.getComputation());
 
-        //s.Simple :=.Simple temp_2.Simple;
-        StringBuilder code = new StringBuilder();
-        code.append("new (array" );
+        // TODO: change the 5 from hard coded
+        computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(5).append(".i32).array.i32;\n");
 
-        for (int i = 1; i < node.getNumChildren(); i++){
-            code.append(", ");
-
-            var temp = visit(node.getChild(i));
-            computation.append(temp.getComputation());
-            code.append(temp.getCode());
-        }
-
-        // TODO change .i32 from hard coded
-        code.append(").array.i32");
-
-        return new OllirExprResult(code.toString(),computation.toString());
+        return new OllirExprResult(tempVar,computation);
     }
 
 
@@ -285,13 +287,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code);
     }
 
-    /**
-     * Default visitor. Visits every child node and return an empty result.
-     *
-     * @param node
-     * @param unused
-     * @return
-     */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
 
         for (var child : node.getChildren()) {
