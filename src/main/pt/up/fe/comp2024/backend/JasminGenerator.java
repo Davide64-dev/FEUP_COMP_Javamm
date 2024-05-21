@@ -10,6 +10,8 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.specs.comp.ollir.OperationType.ADD;
@@ -432,18 +434,24 @@ public class JasminGenerator {
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
+        String regexPattern = "iload_(\\d+)|iload (\\d+)";
+        Pattern pattern = Pattern.compile(regexPattern);
 
-        // todo check the increment pattern and replace it with the iinc
-        /*
-        if (generators.apply(binaryOp.getRightOperand()).split(" ").equals("bipush 1"){
-            return "iinc " +
+        if (generators.apply(binaryOp.getRightOperand()).substring(0, generators.apply(binaryOp.getRightOperand()).length()-1).equals("bipush 1")){
+            System.out.println("bipush found");
+            Matcher matcher = pattern.matcher(generators.apply(binaryOp.getLeftOperand()));
+            if (matcher.find()){
+                return "iinc " + matcher.group(1) + " " + 1  + NL;
+            }
         }
 
-        if (generators.apply(binaryOp.getLeftOperand()).split(" ").equals("bipush 1"){
-
+        if (generators.apply(binaryOp.getLeftOperand()).substring(0, generators.apply(binaryOp.getLeftOperand()).length()-1).equals("bipush 1")){
+            System.out.println("bipsuh found");
+            Matcher matcher = pattern.matcher(generators.apply(binaryOp.getRightOperand()));
+            if (matcher.find()){
+                return "iinc " + matcher.group(1) + NL;
+            }
         }
-
-         */
 
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
