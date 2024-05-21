@@ -117,7 +117,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(child.getComputation());
 
         // TODO: change the 5 from hard coded
-        computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(5).append(".i32).array.i32;\n");
+        computation.append(tempVar).append(".array.i32 := .array.i32 new(array, ").append(5).append(".i32).array.i32;\n");
 
         return new OllirExprResult(tempVar,computation);
     }
@@ -233,7 +233,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             return new OllirExprResult(code);
         }
         else{
-            String code = node.get("name") + "boolean";
+            String code = node.get("name") + ".bool";
             return new OllirExprResult(code);
         }
     }

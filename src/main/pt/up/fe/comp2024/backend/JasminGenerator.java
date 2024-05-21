@@ -377,7 +377,17 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        return "ldc " + literal.getLiteral() + NL;
+        try {
+            int value = Integer.parseInt(literal.getLiteral());
+            if (value >= -128 && value <= 127) {
+                return "bipush " + value + NL;
+            } else {
+                return "ldc " + value + NL;
+            }
+        } catch (NumberFormatException e){
+            return "ldc " + literal.getLiteral() + NL;
+        }
+
     }
 
     private String generateOperand(Operand operand) {
