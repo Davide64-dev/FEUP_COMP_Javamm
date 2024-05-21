@@ -32,8 +32,6 @@ public class Cpf3_Ollir {
     /*checks if method declaration is correct (array)*/
     @Test
     public void section1_Basic_Method_Declaration_Array() {
-        //TODO: tmp0 in the line k.array.i32 :=.array.i32 tmp0; should be tmp0.array.i32;
-        //where are Arithmetic Operations done?
         var result = getOllirResult("basic/BasicMethodsArray.jmm");
 
         var method = CpUtils.getMethod(result, "func4");
@@ -148,7 +146,6 @@ public class Cpf3_Ollir {
     /*checks if an array is correctly initialized*/
     @Test
     public void section4_Arrays_New_Array() {
-        //TODO:same problem with basic method decleration
         var result = getOllirResult("arrays/ArrayNew.jmm");
 
         var method = CpUtils.getMethod(result, "main");

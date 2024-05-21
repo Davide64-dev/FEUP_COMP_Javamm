@@ -196,11 +196,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute the children
         code.append(lhs.getComputation());
-        //TODO: for the test: Arithmetic_and
-        // here the only different thing is instead of
-        // tmp1.bool := .bool invokevirtual(&&., "p", 1.i32).bool; it should be
-        // invokevirtual(c.Arithmetic_and, "p", 1.i32).bool;
-        // the only error i find is in the computation and idk how to change that
         code.append(rhs.getComputation());
 
         // code to compute self

@@ -120,7 +120,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(length.getCode()).append(").array.i32;\n");
 
-        return new OllirExprResult(tempVar,computation);
+        var code = tempVar + ".array.i32";
+
+        return new OllirExprResult(code,computation);
     }
 
 
