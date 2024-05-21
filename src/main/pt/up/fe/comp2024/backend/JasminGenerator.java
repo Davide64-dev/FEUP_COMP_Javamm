@@ -69,9 +69,9 @@ public class JasminGenerator {
             code = generators.apply(ollirResult.getOllirClass());
         }
 
+        System.out.println(code);
         return code;
     }
-
 
     private String generateClassUnit(ClassUnit classUnit) {
 
@@ -157,6 +157,18 @@ public class JasminGenerator {
         );
     }
 
+    private String generateLimitLocals() {
+        int registerCount = 0;
+        for (var abc : currentMethod.getVarTable().values()) {
+            if (abc.getVirtualReg() > registerCount) {
+                registerCount = abc.getVirtualReg();
+            }
+        }
+        registerCount++; // add one because register numbers start at 0
+
+        return String.format(".limit locals %s", registerCount);
+    }
+
     private String generateMethod(Method method) {
         // set method
         currentMethod = method;
@@ -193,7 +205,8 @@ public class JasminGenerator {
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
+        // code.append(TAB).append(".limit locals 99").append(NL);
+        code.append(TAB).append(generateLimitLocals()).append(NL);
 
         for (var inst : method.getInstructions()) {
             // if an invoke virtual or invoke static instruction is being called
@@ -256,7 +269,7 @@ public class JasminGenerator {
         code.append(
             switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
-                case OBJECTREF -> "astore ";
+                case OBJECTREF, ARRAYREF -> "astore ";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             }
         ).append(reg).append(NL);
@@ -306,6 +319,10 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String generateArrayInstruction(CallInstruction callInstruction) {
+        return "";
+    }
+
     private String generateCallInstruction(CallInstruction callInstruction) {
         var code = new StringBuilder();
 
@@ -316,6 +333,8 @@ public class JasminGenerator {
             case NEW, invokespecial -> {
                 if (typeOfElement == ElementType.THIS) {
                     yield ((ClassType) callInstruction.getCaller().getType()).getName();
+                } else if (typeOfElement == ElementType.ARRAYREF) {
+                    yield convertImport(((ArrayType) callInstruction.getCaller().getType()).toString());
                 } else {
                     yield convertImport(((ClassType) callInstruction.getCaller().getType()).getName());
                 }
@@ -327,12 +346,16 @@ public class JasminGenerator {
                     yield convertImport(((Operand) callInstruction.getCaller()).getName());
                 }
             }
-            default -> throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
+            default -> {
+                // System.out.println("Instruction is: " + callInstruction);
+                // throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
+                yield "";
+            }
         };
 
         String inst;
 
-        if (invocationType == CallType.NEW) {
+        if (invocationType == CallType.NEW && typeOfElement != ElementType.ARRAYREF) {
             inst = "new " + methodClassName;
             code.append(inst).append(NL);
             code.append("dup");
@@ -354,18 +377,36 @@ public class JasminGenerator {
             loadInstructions.append(op);
         }
 
-        String methodName = ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
-        if (invocationType == CallType.invokespecial) methodName = "<init>"; // I'm not sure if invokespecial is always a constructor but this works for now
-        String returnType = convertType(callInstruction.getReturnType());
-        inst = String.format(
-                "%s%s %s/%s(%s)%s",
-                loadInstructions,
-                callInstruction.getInvocationType().toString(),
-                convertImport(methodClassName),
-                methodName,
-                arguments,
-                returnType
-        );
+        if (invocationType == CallType.NEW && typeOfElement == ElementType.ARRAYREF) {
+            inst = "newarray int";
+            code.append(loadInstructions).append(NL);
+            code.append(inst).append(NL);
+            return code.toString();
+        }
+
+        if (invocationType == CallType.arraylength) {
+            inst = String.format(
+                    "%s\n%s\n%s\n",
+                    generators.apply(callInstruction.getCaller()),
+                    "arraylength",
+                    loadInstructions
+            );
+        } else {
+            String methodName = switch (invocationType) {
+                case invokespecial -> "<init>";
+                default -> ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
+            };
+            String returnType = convertType(callInstruction.getReturnType());
+            inst = String.format(
+                    "%s%s %s/%s(%s)%s",
+                    loadInstructions,
+                    callInstruction.getInvocationType().toString(),
+                    convertImport(methodClassName),
+                    methodName,
+                    arguments,
+                    returnType
+            );
+        }
         code.append(inst).append(NL);
 
         if (needsPop) {
