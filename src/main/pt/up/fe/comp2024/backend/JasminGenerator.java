@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.specs.comp.ollir.OperationType.ADD;
+
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -249,14 +251,25 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: I think this is good and supports all possible types, but not sure
-        code.append(
-            switch (assign.getTypeOfAssign().getTypeOfElement()) {
+        String instr;
+        if (reg > 3){
+            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
                 case OBJECTREF -> "astore ";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
-            }
-        ).append(reg).append(NL);
+            };
+        }
+
+        else{
+            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+                case INT32, BOOLEAN -> "istore_";
+                case OBJECTREF -> "astore_";
+                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
+            };
+        }
+
+        // TODO: I think this is good and supports all possible types, but not sure
+        code.append(instr).append(reg).append(NL);
 
         return code.toString();
     }
@@ -381,9 +394,14 @@ public class JasminGenerator {
             int value = Integer.parseInt(literal.getLiteral());
             if (value >= -128 && value <= 127) {
                 return "bipush " + value + NL;
-            } else {
+
+            } else if (value >= -32768 && value <= 32767){
+                return "sipush " + value + NL;
+            }
+            else {
                 return "ldc " + value + NL;
             }
+
         } catch (NumberFormatException e){
             return "ldc " + literal.getLiteral() + NL;
         }
@@ -395,16 +413,37 @@ public class JasminGenerator {
         var varType = currentMethod.getVarTable().get(operand.getName()).getVarType();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        String loadInst = switch (varType.getTypeOfElement()) {
-            case INT32, BOOLEAN -> "iload ";
-            default -> "aload ";
-        };
+        String loadInst;
+        if (reg > 3) {
+            loadInst = switch (varType.getTypeOfElement()) {
+                case INT32, BOOLEAN -> "iload ";
+                default -> "aload ";
+            };
+        }
+        else {
+            loadInst = switch (varType.getTypeOfElement()) {
+                case INT32, BOOLEAN -> "iload_";
+                default -> "aload_";
+            };
+        }
 
         return loadInst + reg + NL; // this NL should NOT be removed
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
+
+        // todo check the increment pattern and replace it with the iinc
+        /*
+        if (generators.apply(binaryOp.getRightOperand()).split(" ").equals("bipush 1"){
+            return "iinc " +
+        }
+
+        if (generators.apply(binaryOp.getLeftOperand()).split(" ").equals("bipush 1"){
+
+        }
+
+         */
 
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
