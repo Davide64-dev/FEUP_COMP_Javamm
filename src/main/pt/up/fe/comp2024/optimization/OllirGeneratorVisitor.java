@@ -58,7 +58,17 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(NEW_OBJECT, this::visitNewObject);
         addVisit(ARRAY_CALL, this:: visitArrayCall);
         addVisit(ARRAY_ACCESS, this:: visitArrayAccess);
+        addVisit(PAR_STMT, this:: visitParStmt);
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitParStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        var par = visit(node.getChild(0));
+        code.append(par);
+
+        return code.toString();
     }
 
     private String visitArrayAccess(JmmNode node, Void unused) {
@@ -69,6 +79,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitArrayCall(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
+
 
         return code.toString();
     }
@@ -189,11 +200,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute the children
         code.append(lhs.getComputation());
-        //TODO: for the test: Arithmetic_and
-        // here the only different thing is instead of
-        // tmp1.bool := .bool invokevirtual(&&., "p", 1.i32).bool; it should be
-        // invokevirtual(c.Arithmetic_and, "p", 1.i32).bool;
-        // the only error i find is in the computation and idk how to change that
         code.append(rhs.getComputation());
 
         // code to compute self
@@ -250,7 +256,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
     private String visitIfStmt(JmmNode node, Void unused) {
-        //pernaei ta if else opote asto gia tora
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
 
@@ -265,27 +270,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
         code.append(expr.getComputation());
 
-        //allaje ta onomata ton string
         String trueLabel = "if" + labelCounter;
-        String falseLabel = "endif" + labelCounter;
+        String falseLabel = "endif" + labelCounter++;
 
         code.append("if (").append(expr.getCode()).append(") goto ").append(trueLabel).append(";\n");
-        //des pos to ekanes sto param stmt kai kanot analoga
-        var childCode = visit(node.getChild(2));
-        code.append(childCode);
+        var elsecode = visit(node.getJmmChild(2));
+        code.append(elsecode);
         code.append("goto ").append(falseLabel).append(";\n");
-        //to idio kai edo
-        //tou if code
         code.append(trueLabel).append(":\n");
-
-        if (node.getNumChildren() > 1) {
-            code.append(visit(node.getJmmChild(1), unused));
-        }
-
+        var ifcode =visit(node.getChild(1));
+        code.append(ifcode);
         code.append(falseLabel).append(":\n");
 
         return code.toString();
-        //meta otan to kaneis gia ena if logika tha xreiastei na to kaneis kai gia polla auto einai gia to switch stat
     }
     private String visitWhileStmt(JmmNode node, Void unused) {
         //Passes the test but i should show whats inside the while as well

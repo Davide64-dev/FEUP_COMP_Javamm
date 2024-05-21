@@ -38,8 +38,19 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(NEW_ARRAY, this::visitNewArray);
         addVisit(ARRAY_ACCESS, this::visitArrayAcess);
         addVisit(LENGTH, this::visitLength);
+        addVisit(NOT_OP, this::visitNotOp);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirExprResult visitNotOp(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+
+
+        computation.append(visit(node.getJmmChild(0)).getCode());
+
+        var code = "!.bool " + computation;
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitLength(JmmNode node, Void unused){
@@ -229,7 +240,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             return new OllirExprResult(code);
         }
         else{
-            String code = node.get("name") + "boolean";
+            String code = node.get("name") + ".bool";
             return new OllirExprResult(code);
         }
     }
