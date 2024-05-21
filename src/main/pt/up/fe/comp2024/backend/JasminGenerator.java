@@ -54,6 +54,7 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(CallInstruction.class, this::generateCallInstruction);
+        generators.put(OpCondInstruction.class, this::generateOpCondInstruction);
         generators.put(SingleOpCondInstruction.class, this::generateSingleOpCondInstruction);
         generators.put(GotoInstruction.class, this::generateGotoInstruction);
     }
@@ -421,6 +422,24 @@ public class JasminGenerator {
         return generators.apply(singleOp.getSingleOperand());
     }
 
+    private String generateOpCondInstruction(OpCondInstruction opCondInstruction) {
+        var code = new StringBuilder();
+
+        var instType = opCondInstruction.getInstType();
+        var inst = opCondInstruction.getCondition();
+        var leftOp = ((BinaryOpInstruction) inst).getLeftOperand();
+        var rightOp = ((BinaryOpInstruction) inst).getRightOperand();
+        var opType = ((OpInstruction) inst).getOperation().getOpType();
+
+        if (opType == OperationType.LTH) {
+            code.append(generators.apply(leftOp))
+                .append(generators.apply(rightOp))
+                .append("if_icmplt").append(NL);
+        }
+
+        return code.toString();
+    }
+
     private String generateSingleOpCondInstruction(SingleOpCondInstruction singleOpCondInstruction) {
         StringBuilder code = new StringBuilder();
 
@@ -466,6 +485,8 @@ public class JasminGenerator {
             case DIV -> "idiv";
             // boolean
             // case LTH ->
+            case LTH -> "if_icmplt";
+            case GTE -> "if_icmpte";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
