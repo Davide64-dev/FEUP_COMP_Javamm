@@ -273,22 +273,22 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        String instr;
+        String inst;
         if (reg > 3){
-            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
                 case OBJECTREF, ARRAYREF -> "astore ";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             };
         } else {
-            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore_";
                 case OBJECTREF, ARRAYREF -> "astore_";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             };
         }
 
-        code.append(instr).append(reg).append(NL);
+        code.append(inst).append(reg).append(NL);
 
         return code.toString();
     }
@@ -333,10 +333,6 @@ public class JasminGenerator {
         code.append(getInst).append(NL);
 
         return code.toString();
-    }
-
-    private String generateArrayInstruction(CallInstruction callInstruction) {
-        return "";
     }
 
     private String generateCallInstruction(CallInstruction callInstruction) {
@@ -486,7 +482,6 @@ public class JasminGenerator {
             int value = Integer.parseInt(literal.getLiteral());
             if (value >= -128 && value <= 127) {
                 return "bipush " + value + NL;
-
             } else if (value >= -32768 && value <= 32767){
                 return "sipush " + value + NL;
             } else {
@@ -520,23 +515,24 @@ public class JasminGenerator {
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
+
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
+
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
+        code.append(switch (binaryOp.getOperation().getOpType()) {
             // arithmetic
             case ADD -> "iadd";
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
             // boolean
-            // case LTH ->
             case LTH -> "if_icmplt";
             case GTE -> "if_icmpte";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-        };
-        code.append(op).append(NL);
+        }).append(NL);
+
         return code.toString();
     }
 
@@ -583,7 +579,7 @@ public class JasminGenerator {
         code.append(op).append(NL);
 
         return code.toString();
-    }*/
+    } */
 
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
