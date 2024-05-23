@@ -160,9 +160,9 @@ public class JasminGenerator {
 
     private String generateLimitLocals() {
         int registerCount = 0;
-        for (var abc : currentMethod.getVarTable().values()) {
-            if (abc.getVirtualReg() > registerCount) {
-                registerCount = abc.getVirtualReg();
+        for (var reg: currentMethod.getVarTable().values()) {
+            if (reg.getVirtualReg() > registerCount) {
+                registerCount = reg.getVirtualReg();
             }
         }
         registerCount++; // add one because register numbers start at 0
@@ -210,6 +210,12 @@ public class JasminGenerator {
         code.append(TAB).append(generateLimitLocals()).append(NL);
 
         for (var inst : method.getInstructions()) {
+            // check for labels
+            method.getLabels().entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(inst))
+                    .findFirst()
+                    .ifPresent(entry -> code.append(String.format("%s:\n", entry.getKey())));
+
             // if an invoke virtual or invoke static instruction is being called
             // from here, it will need pop, since that means it's not in an assignment
             // (IFF it is not void, aka doesn't return anything)
@@ -258,7 +264,6 @@ public class JasminGenerator {
         // store value in the stack in destination
         var lhs = assign.getDest();
 
-        // TODO: What is this?
         if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
@@ -266,7 +271,6 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: I think this is good and supports all possible types, but not sure
         code.append(
             switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
@@ -434,22 +438,19 @@ public class JasminGenerator {
         if (opType == OperationType.LTH) {
             code.append(generators.apply(leftOp))
                 .append(generators.apply(rightOp))
-                .append("if_icmplt").append(NL);
+                .append("if_icmplt ").append(opCondInstruction.getLabel())
+                .append(NL);
         }
 
         return code.toString();
     }
 
     private String generateSingleOpCondInstruction(SingleOpCondInstruction singleOpCondInstruction) {
-        StringBuilder code = new StringBuilder();
-
-        return code.toString();
+        return String.format("%s\nifne %s", generators.apply(singleOpCondInstruction.getCondition()),singleOpCondInstruction.getLabel());
     }
 
     private String generateGotoInstruction(GotoInstruction gotoInstruction) {
-        StringBuilder code = new StringBuilder();
-
-        return code.toString();
+        return String.format("goto %s", gotoInstruction.getLabel());
     }
 
     private String generateLiteral(LiteralElement literal) {
