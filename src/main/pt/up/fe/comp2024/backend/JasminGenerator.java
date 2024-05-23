@@ -540,6 +540,7 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    // "optimized" version that doesn't work
     /* private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
         String regexPattern = "iload_(\\d+)|iload (\\d+)";
