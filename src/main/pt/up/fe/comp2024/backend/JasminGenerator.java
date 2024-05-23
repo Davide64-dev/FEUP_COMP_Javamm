@@ -56,6 +56,7 @@ public class JasminGenerator {
         generators.put(CallInstruction.class, this::generateCallInstruction);
         generators.put(OpCondInstruction.class, this::generateOpCondInstruction);
         generators.put(SingleOpCondInstruction.class, this::generateSingleOpCondInstruction);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOpInstruction);
         generators.put(GotoInstruction.class, this::generateGotoInstruction);
     }
 
@@ -435,13 +436,18 @@ public class JasminGenerator {
         var rightOp = ((BinaryOpInstruction) inst).getRightOperand();
         var opType = ((OpInstruction) inst).getOperation().getOpType();
 
+        // maybe merge these and change only the if
         if (opType == OperationType.LTH) {
             code.append(generators.apply(leftOp))
                 .append(generators.apply(rightOp))
                 .append("if_icmplt ").append(opCondInstruction.getLabel())
                 .append(NL);
+        } else if (opType == OperationType.GTE) {
+            code.append(generators.apply(leftOp))
+                    .append(generators.apply(rightOp))
+                    .append("if_icmpge ").append(opCondInstruction.getLabel())
+                    .append(NL);
         }
-
         return code.toString();
     }
 
@@ -451,6 +457,18 @@ public class JasminGenerator {
 
     private String generateGotoInstruction(GotoInstruction gotoInstruction) {
         return String.format("goto %s", gotoInstruction.getLabel());
+    }
+
+    private String generateUnaryOpInstruction(UnaryOpInstruction unaryOpInstruction) {
+        var code = new StringBuilder();
+
+        if (unaryOpInstruction.getOperation().getOpType() == OperationType.NOTB) {
+            code.append(String.format("iconst_1\n%s\nixor\n",
+                    generators.apply(unaryOpInstruction.getOperand())
+            ));
+        }
+
+        return code.toString();
     }
 
     private String generateLiteral(LiteralElement literal) {
