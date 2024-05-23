@@ -10,6 +10,7 @@ public enum Kind {
     PROGRAM,
     CLASS_DECL,
     VAR_DECL,
+    PAR_STMT,
     TYPE,
     METHOD_DECL,
     PARAM,
@@ -22,6 +23,11 @@ public enum Kind {
     CONST,
     ARRAY_ACCESS,
     WHILE_STMT,
+
+    LENGTH,
+
+    NOT_OP,
+
     IF_STMT,
     THIS,
     IMPORT_DECLARATION,
@@ -32,6 +38,8 @@ public enum Kind {
     BINARY_OP,
 
     EXPR,
+
+    NEW_ARRAY,
 
     THIS_EXPR;
 

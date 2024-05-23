@@ -77,7 +77,7 @@ public class Cpf3_Ollir {
     @Test
     public void section2_Arithmetic_not() {
         var ollirResult = getOllirResult("arithmetic/Arithmetic_not.jmm");
-
+        //xreiazetai mono ena !.bool
         var method = CpUtils.getMethod(ollirResult, "main");
 
         CpUtils.assertNumberOfOperations(OperationType.NOTB, 1, method, ollirResult);

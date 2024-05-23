@@ -31,31 +31,36 @@ public class OptUtils {
     }
 
     public static String toOllirType(JmmNode typeNode) {
-
         TYPE.checkOrThrow(typeNode);
 
         String typeName = typeNode.get("name");
+        boolean isArray = typeNode.get("isArray").equals("true");
 
-        return toOllirType(typeName);
+        return toOllirType(typeName, isArray);
     }
 
     public static String toOllirType(Type type) {
-        return toOllirType(type.getName());
+        return toOllirType(type.getName(), type.isArray());
     }
 
-    private static String toOllirType(String typeName) {
-
-        String type = "." + switch (typeName) {
+    private static String toOllirType(String typeName, boolean isArray) {
+        String baseType = switch (typeName) {
             case "int" -> "i32";
             case "String" -> "String";
             case "void" -> "V";
             case "boolean" -> "bool";
             default -> typeName;
-            //default -> throw new NotImplementedException(typeName);
         };
 
-        return type;
+        String ollirType = "." + baseType;
+
+        if (isArray) {
+            ollirType = ".array" + ollirType; // Prepend `.array` to indicate it's an array
+        }
+
+        return ollirType;
     }
+
 
 
 }

@@ -78,7 +78,7 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         var callParams = methodRefExpr.getChildren(Kind.EXPR);
 
-        if (methodRefExpr.get("ignore_first").equals("true") && !methodParams.isEmpty()) {
+        if (methodRefExpr.get("ignore_first").equals("true") && !callParams.isEmpty()) {
             // Creating a new List to store parameters, excluding the first one
             var callParams1 = new ArrayList<>(callParams.subList(1, callParams.size()));
             // Assigning the new list to callParams

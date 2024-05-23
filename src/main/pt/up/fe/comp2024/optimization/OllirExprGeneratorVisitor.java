@@ -35,9 +35,106 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(CONST, this::visitConst);
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_OBJECT, this::visitNewObject);
-   
+        addVisit(NEW_ARRAY, this::visitNewArray);
+        addVisit(ARRAY_ACCESS, this::visitArrayAcess);
+        addVisit(LENGTH, this::visitLength);
+        addVisit(NOT_OP, this::visitNotOp);
+        addVisit(ARRAY_CALL, this::visitArrayCall);
         setDefaultVisit(this::defaultVisit);
     }
+
+    private OllirExprResult visitNotOp(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+
+
+        computation.append(visit(node.getJmmChild(0)).getCode());
+
+        var code = "!.bool " + computation;
+        return new OllirExprResult(code, computation);
+    }
+    private OllirExprResult visitArrayCall(JmmNode node, Void unused){
+        var typeName = node.getChild(0).get("name");
+
+        var tempVar = OptUtils.getTemp();
+
+        StringBuilder computation = new StringBuilder();
+
+        computation.append(tempVar).append(".array.i32 ").append(" := .array.i32 new (array,").append(node.getNumChildren()).append(".i32).array.i32;\n");
+
+        for (int i = 0; i < node.getNumChildren(); i++){
+
+            var nodeComputation = visit(node.getChild(0));
+
+            computation.append(nodeComputation.getComputation());
+
+            computation.append(tempVar).append("[").append(i).append(".i32].i32 := .i32 ").append(nodeComputation.getCode()).append(";\n");
+        }
+
+        return new OllirExprResult(tempVar + ".i32", computation);
+    }
+
+    private OllirExprResult visitLength(JmmNode node, Void unused){
+        StringBuilder computation = new StringBuilder();
+        var array = node.getChild(0);
+        var arrayData = visit(array);
+        var tempVar = OptUtils.getTemp();
+        computation.append(arrayData.getComputation());
+
+        computation.append(tempVar).append(".i32").append(" := .i32 arraylength(").append(arrayData.getCode()).append(")").append(".i32;\n");
+
+        var code = tempVar + ".i32";
+
+        return new OllirExprResult(code, computation);
+
+    }
+
+    private OllirExprResult visitArrayAcess(JmmNode node, Void unused){
+
+        StringBuilder computation = new StringBuilder();
+
+        var array = node.getChild(0);
+        var index = node.getChild(1);
+
+        var arrayData = visit(array);
+        var indexData = visit(index);
+        var tempVar = OptUtils.getTemp();
+
+        computation.append(arrayData.getComputation());
+        computation.append(indexData.getComputation());
+
+        var type = ".i32";
+        int count = 1;
+
+        computation.append(tempVar).append(type).append(" ").append(ASSIGN).append(" ").append(type).append(" $")
+                    .append(count).append(".").append(arrayData.getCode().split("\\.")[0]).append("[").append(indexData.getCode().split("\\.")[0])
+                    .append(type).append("]").append(type).append(";\n");
+
+        var code = tempVar + type;
+        return new OllirExprResult(code,computation);
+    }
+
+    private OllirExprResult visitNewArray(JmmNode node, Void unused){
+
+        // .array.i32 new(array, 5.i32).array.i32;
+
+        var tempVar = OptUtils.getTemp();
+
+        StringBuilder computation = new StringBuilder();
+
+        var child = visit(node.getChild(0));
+
+        computation.append(child.getComputation());
+
+
+        var length = visit(node.getChild(1));
+
+        computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(length.getCode()).append(").array.i32;\n");
+
+        var code = tempVar + ".array.i32";
+
+        return new OllirExprResult(code,computation);
+    }
+
 
     private OllirExprResult visitNewObject(JmmNode node, Void unused){
 
@@ -149,7 +246,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             return new OllirExprResult(code);
         }
         else{
-            String code = node.get("name") + "boolean";
+            String code = node.get("name") + ".bool";
             return new OllirExprResult(code);
         }
     }
@@ -194,13 +291,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code);
     }
 
-    /**
-     * Default visitor. Visits every child node and return an empty result.
-     *
-     * @param node
-     * @param unused
-     * @return
-     */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
 
         for (var child : node.getChildren()) {
