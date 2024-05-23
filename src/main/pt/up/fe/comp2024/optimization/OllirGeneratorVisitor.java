@@ -325,12 +325,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitParam(JmmNode node, Void unused) {
 
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
+        var isVarArg = node.get("isVarArg");
         var isArray = node.getChild(0).get("isArray");
         var id = node.get("name");
         StringBuilder code = new StringBuilder();
 
         code.append(id);
-
+        if(isVarArg == "true"){
+            code.append(".array");
+        }
         code.append(typeCode);
 
         return code.toString();
