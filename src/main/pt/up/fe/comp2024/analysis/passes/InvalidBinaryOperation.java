@@ -1,20 +1,12 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
-import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp2024.JavammParser;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
 
 public class InvalidBinaryOperation extends AnalysisVisitor {
 
@@ -39,8 +31,8 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
         var leftType = getVariableType(leftOperand, table, currentMethod);
         var rightType = getVariableType(rightOperand, table, currentMethod);
 
-        if (leftType.getName().equals(rightType.getName())){
-            if (!leftType.isArray() && !rightType.isArray()){
+        if (leftType.getName().equals(rightType.getName())) {
+            if (!leftType.isArray() && !rightType.isArray()) {
                 return null;
             }
         }

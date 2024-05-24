@@ -39,28 +39,31 @@ public class MethodCallParameters extends AnalysisVisitor {
         List<Symbol> methodParams;
         try {
             methodParams = table.getParameters(methodRefName);
-        } catch(NullPointerException e) {
+        } catch (NullPointerException e) {
             return null;
         }
 
         var methods = table.getMethods();
 
         boolean inTable = false;
-        for (var method : methods){
-            if (method.equals(methodRefName)) inTable = true;
+        for (var method : methods) {
+            if (method.equals(methodRefName)) {
+                inTable = true;
+                break;
+            }
         }
 
-        if (!inTable){
+        if (!inTable) {
 
             var objectOrStaticValue = methodRefExpr.getChild(0);
 
             var type = getVariableType(objectOrStaticValue, table, currentMethod);
 
-            if (type.getName().isEmpty()){
+            if (type.getName().isEmpty()) {
                 var name = objectOrStaticValue.get("name").substring(1, type.getName().length() - 2);
-                for (var importStmt : table.getImports()){
+                for (var importStmt : table.getImports()) {
                     var importStmtName = importStmt.substring(1, importStmt.length() - 2);
-                    if (importStmtName.equals(name)){
+                    if (importStmtName.equals(name)) {
                         return null;
                     }
                 }
@@ -92,7 +95,8 @@ public class MethodCallParameters extends AnalysisVisitor {
             if (methodParams.get(methodParams.size() - 1).getType().isArray()) {
                 return null;
             }
-        } catch (IndexOutOfBoundsException e) { }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         if (methodParams.size() != callParams.size()) {
             var message = "The number of parameters are not the same";
@@ -108,11 +112,11 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         boolean alright = true;
 
-        for (int i = 0; i < methodParams.size(); i++){
+        for (int i = 0; i < methodParams.size(); i++) {
             var expected = methodParams.get(i).getType();
             var actual = getVariableType(callParams.get(i), table, currentMethod);
-            if (expected.getName().equals(actual.getName())){
-                if (expected.isArray() == actual.isArray()){
+            if (expected.getName().equals(actual.getName())) {
+                if (expected.isArray() == actual.isArray()) {
                     // same type, must return;
                     continue;
                 } else {

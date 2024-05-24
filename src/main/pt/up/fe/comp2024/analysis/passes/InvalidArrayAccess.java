@@ -7,15 +7,14 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class InvalidArrayAccess extends AnalysisVisitor {
 
-    private String currentMethod;
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+");
+    private String currentMethod;
 
     @Override
     public void buildVisitor() {
@@ -37,15 +36,7 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
         var arrayAccess = arrayExpr.getChild(1);
 
-        for (var param : table.getFields()){
-            if (param.getName().equals(arrayNode.get("name"))){
-                if (param.getType().isArray()){
-                    return null;
-                }
-            }
-        }
-
-        for (var param : table.getParameters(currentMethod)){
+        for (var param : table.getFields()) {
             if (param.getName().equals(arrayNode.get("name"))) {
                 if (param.getType().isArray()) {
                     return null;
@@ -53,7 +44,15 @@ public class InvalidArrayAccess extends AnalysisVisitor {
             }
         }
 
-        for (var param : table.getLocalVariables(currentMethod)){
+        for (var param : table.getParameters(currentMethod)) {
+            if (param.getName().equals(arrayNode.get("name"))) {
+                if (param.getType().isArray()) {
+                    return null;
+                }
+            }
+        }
+
+        for (var param : table.getLocalVariables(currentMethod)) {
             if (param.getName().equals(arrayNode.get("name"))) {
                 if (param.getType().isArray()) {
                     return null;

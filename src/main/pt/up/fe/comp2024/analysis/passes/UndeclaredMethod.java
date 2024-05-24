@@ -33,7 +33,7 @@ public class UndeclaredMethod extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var methodRefName = methodRefExpr.get("name");
 
-        if (currentMethod.equals("main")){
+        if (currentMethod.equals("main")) {
             if (methodRefExpr.get("is_this").equals("true")) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
@@ -51,16 +51,17 @@ public class UndeclaredMethod extends AnalysisVisitor {
             return null;
         }
 
-        try{
+        try {
             var object = methodRefExpr.getChild(0);
             var debug = getVariableType(object, table, currentMethod).getName();
             if (!getVariableType(object, table, currentMethod).getName().equals("int") && !getVariableType(object, table, currentMethod).getName().equals("boolean")
-                    && !getVariableType(object, table, currentMethod).getName().equals(className)){
+                    && !getVariableType(object, table, currentMethod).getName().equals(className)) {
                 // It is an object, assume method exists
                 return null;
             }
             // Must check here if the object is extendable and, with that, assum it is correct
-        } catch (NullPointerException e){}
+        } catch (NullPointerException e) {
+        }
 
         if (!table.getSuper().isEmpty()) return null;
 

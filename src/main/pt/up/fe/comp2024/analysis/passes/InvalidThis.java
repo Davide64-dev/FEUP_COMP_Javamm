@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import  pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -8,12 +7,9 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
-
-import java.util.List;
 
 
-public class InvalidThis  extends AnalysisVisitor {
+public class InvalidThis extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
@@ -25,7 +21,7 @@ public class InvalidThis  extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
 
         var method = stmt.getAncestor(Kind.METHOD_DECL);
-        if (method.get().get("name").equals("main")){
+        if (method.get().get("name").equals("main")) {
             var message = "This keyword cannot be used in main method";
             addReport(Report.newError(
                     Stage.SEMANTIC,
@@ -36,7 +32,7 @@ public class InvalidThis  extends AnalysisVisitor {
             );
         }
 
-        if (method.isPresent() && method.get().get("isStatic").equals("true")){
+        if (method.isPresent() && method.get().get("isStatic").equals("true")) {
             var message = "This keyword cannot be used in static methods";
             addReport(Report.newError(
                     Stage.SEMANTIC,

@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -8,11 +7,8 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.List;
-
-public class ExpressionCondition  extends AnalysisVisitor {
+public class ExpressionCondition extends AnalysisVisitor {
 
     private String currentMethod;
 
@@ -34,59 +30,59 @@ public class ExpressionCondition  extends AnalysisVisitor {
         var condition = stmt.getChild(0);
 
         // If it is a constant - Must be true or false
-        if (condition.getKind().equals(Kind.CONST.toString())){
-            if (condition.get("name").equals("true") || condition.get("name").equals("false")){
+        if (condition.getKind().equals(Kind.CONST.toString())) {
+            if (condition.get("name").equals("true") || condition.get("name").equals("false")) {
                 // Condition is a constant, return
                 return null;
             }
         }
 
         // If it is a binary expression, it must be < && or ||
-        if (condition.getKind().equals(Kind.BINARY_EXPR.toString())){
+        if (condition.getKind().equals(Kind.BINARY_EXPR.toString())) {
             if (condition.get("name").equals("<") ||
                     condition.get("name").equals("&&") ||
-                    condition.get("name").equals("||")){
+                    condition.get("name").equals("||")) {
                 // Condition is a boolean expression, return
                 return null;
             }
         }
 
         // If it is a variable
-        if (condition.getKind().equals(Kind.VAR_REF_EXPR.toString())){
-                for (var symbol : table.getFields()){
-                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
-                            && !symbol.getType().isArray()){
-                        return null;
-                    }
+        if (condition.getKind().equals(Kind.VAR_REF_EXPR.toString())) {
+            for (var symbol : table.getFields()) {
+                if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                        && !symbol.getType().isArray()) {
+                    return null;
                 }
+            }
 
-                for (var symbol : table.getParameters(currentMethod)){
-                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
-                            && !symbol.getType().isArray()){
-                        return null;
-                    }
+            for (var symbol : table.getParameters(currentMethod)) {
+                if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                        && !symbol.getType().isArray()) {
+                    return null;
                 }
+            }
 
-                for (var symbol : table.getLocalVariables(currentMethod)){
-                    if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
-                            && !symbol.getType().isArray()){
-                        return null;
-                    }
+            for (var symbol : table.getLocalVariables(currentMethod)) {
+                if (symbol.getName().equals(condition.get("name")) && symbol.getType().getName().equals("boolean")
+                        && !symbol.getType().isArray()) {
+                    return null;
                 }
+            }
         }
 
-        if (condition.getKind().equals(Kind.METHOD_CALL.toString())){
+        if (condition.getKind().equals(Kind.METHOD_CALL.toString())) {
 
-            for (var method : table.getFields()){
+            for (var method : table.getFields()) {
                 if (method.getName().equals(condition.get("name")) && method.getType().getName().equals("boolean")
-                            && !method.getType().isArray()){
+                        && !method.getType().isArray()) {
                     return null;
                 }
             }
         }
 
         // Create error report
-        var message = String.format("'%s' is not a condition.", condition.toString());
+        var message = String.format("'%s' is not a condition.", condition);
 
         addReport(Report.newError(
                 Stage.SEMANTIC,

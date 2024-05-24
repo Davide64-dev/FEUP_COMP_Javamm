@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -27,18 +26,19 @@ public class StaticMethods extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitVar(JmmNode varExpr, SymbolTable table){
+    private Void visitVar(JmmNode varExpr, SymbolTable table) {
         var temp = varExpr.getAncestor(Kind.METHOD_DECL).get();
         try {
             if (temp.get("isStatic").equals("false")) {
                 return null;
             }
-        } catch (NullPointerException e) { }
+        } catch (NullPointerException e) {
+        }
 
-        for (var field : table.getFields()){
-            if (field.getName().equals(varExpr.get("name"))){
+        for (var field : table.getFields()) {
+            if (field.getName().equals(varExpr.get("name"))) {
 
-                for( var variable : table.getLocalVariables(currentMethod)){
+                for (var variable : table.getLocalVariables(currentMethod)) {
                     if (variable.getName().equals(varExpr.get("name"))) return null;
                 }
                 var message = "Can't use fields  on static methods";
@@ -64,7 +64,8 @@ public class StaticMethods extends AnalysisVisitor {
             if (temp.get("isStatic").equals("false")) {
                 return null;
             }
-        } catch (NullPointerException e) { }
+        } catch (NullPointerException e) {
+        }
 
         // Create error report
         var message = "Can't use keyword this on static methods";

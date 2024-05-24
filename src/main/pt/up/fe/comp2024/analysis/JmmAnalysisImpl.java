@@ -33,7 +33,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new MethodCallParameters(),
                 new IncompatibleReturn(),
                 new RepeatedNames()
-                );
+        );
 
     }
 

@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -20,11 +19,10 @@ public class InvalidAssign extends AnalysisVisitor {
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+");
 
     public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("||", "&&", "<", "!");
-
+    public List<String> imports = new ArrayList<String>();
     private String currentMethod;
     private String superClass;
     private boolean isExtended = false;
-    public List<String> imports = new ArrayList<String>();
 
     @Override
     public void buildVisitor() {
@@ -34,7 +32,7 @@ public class InvalidAssign extends AnalysisVisitor {
         addVisit(Kind.IMPORT_DECLARATION, this::visitImport);
     }
 
-    private Void visitImport(JmmNode declaration, SymbolTable table){
+    private Void visitImport(JmmNode declaration, SymbolTable table) {
 
         String lib = declaration.get("lib");
 
@@ -61,8 +59,7 @@ public class InvalidAssign extends AnalysisVisitor {
                 superClass = classDecl.get("superClass");
             }
             return null;
-        }
-        catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return null;
         }
     }
@@ -78,15 +75,15 @@ public class InvalidAssign extends AnalysisVisitor {
                 return null;
             } else {
                 addReport(Report.newError(
-                        Stage.SEMANTIC,
-                        NodeUtils.getLine(assignExpr),
-                        NodeUtils.getColumn(assignExpr),
-                        "trying to access array with non integer",
-                        null
+                                Stage.SEMANTIC,
+                                NodeUtils.getLine(assignExpr),
+                                NodeUtils.getColumn(assignExpr),
+                                "trying to access array with non integer",
+                                null
                         )
                 );
             }
-        } else if (!assigned.getKind().equals(Kind.VAR_REF_EXPR.toString())){
+        } else if (!assigned.getKind().equals(Kind.VAR_REF_EXPR.toString())) {
             var message = String.format("'%s' is not a variable", assigned.get("name"));
 
             addReport(Report.newError(
@@ -99,14 +96,14 @@ public class InvalidAssign extends AnalysisVisitor {
             return null;
         }
 
-        if (getVariableType(assigned, table, currentMethod).isArray()){
-            if(assignee.getKind().equals((Kind.ARRAY_CALL.toString())))
+        if (getVariableType(assigned, table, currentMethod).isArray()) {
+            if (assignee.getKind().equals((Kind.ARRAY_CALL.toString())))
                 // Both arrays, return - Also check if it is an array of the same type
                 // Must loop to check all the elements of the array must be integers
                 //var nodeChildren = assignee.getChildren();
-                for (var node : assignee.getChildren()){
+                for (var node : assignee.getChildren()) {
                     boolean isValid = true;
-                    if (!getVariableType(node, table, currentMethod).getName().equals("int")){
+                    if (!getVariableType(node, table, currentMethod).getName().equals("int")) {
                         var message = String.format("'%s' type do not correspond to the correct type", assigned.get("name"));
 
 
@@ -120,12 +117,12 @@ public class InvalidAssign extends AnalysisVisitor {
                     }
                 }
 
-                return null;
+            return null;
         }
 
         // If they are from the Same type
         if (getVariableType(assigned, table, currentMethod).getName().equals(getVariableType(assignee, table, currentMethod).getName())
-                && getVariableType(assigned, table, currentMethod).isArray() == getVariableType(assignee, table, currentMethod).isArray()){
+                && getVariableType(assigned, table, currentMethod).isArray() == getVariableType(assignee, table, currentMethod).isArray()) {
             // Same type
             return null;
         }
@@ -135,8 +132,8 @@ public class InvalidAssign extends AnalysisVisitor {
 
         // Check if a class extends the other
 
-        if (assignee.getKind().toString().equals("ArrayCall")){
-            if (!assignedType.isArray()){
+        if (assignee.getKind().equals("ArrayCall")) {
+            if (!assignedType.isArray()) {
                 var message = String.format("'%s' type do not correspond to the correct type", assigned.get("name"));
 
 
@@ -159,7 +156,7 @@ public class InvalidAssign extends AnalysisVisitor {
             }
         }
 
-        if (imports.contains(assigneeType.getName()) && imports.contains(assignedType.getName())){
+        if (imports.contains(assigneeType.getName()) && imports.contains(assignedType.getName())) {
             return null;
         }
 
@@ -174,7 +171,6 @@ public class InvalidAssign extends AnalysisVisitor {
                 message,
                 null)
         );
-
 
 
         return null;

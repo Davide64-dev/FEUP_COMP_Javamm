@@ -9,10 +9,6 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.List;
-
-import static pt.up.fe.comp2024.ast.Kind.*;
-
 /**
  * Checks if the type of the expression in a return statement is compatible with the method return type.
  *
@@ -58,8 +54,8 @@ public class UndeclaredVariable extends AnalysisVisitor {
             return null;
         }
 
-        for (var importStmt : table.getImports()){
-            if (importStmt.substring(1, importStmt.length() - 1).equals(varRefName)){
+        for (var importStmt : table.getImports()) {
+            if (importStmt.substring(1, importStmt.length() - 1).equals(varRefName)) {
                 return null;
             }
         }

@@ -3,10 +3,6 @@ package pt.up.fe.comp2024.symboltable;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp2024.ast.Kind;
-import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,11 +77,11 @@ public class JmmSymbolTable implements SymbolTable {
         return Collections.unmodifiableList(locals.get(methodSignature));
     }
 
-    public boolean hasVariable(String variable, String method){
-        for (var field : fields){
+    public boolean hasVariable(String variable, String method) {
+        for (var field : fields) {
             if (field.getName().equals(variable)) return true;
         }
-        for (var varia : getLocalVariables(method)){
+        for (var varia : getLocalVariables(method)) {
             if (varia.getName().equals(variable)) return true;
         }
 

@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -38,7 +37,7 @@ public class InvalidArrayIndex extends AnalysisVisitor {
 
         var type = getVariableType(arrayAccess, table, currentMethod);
 
-        if (!type.isArray() && type.getName().equals("int")){
+        if (!type.isArray() && type.getName().equals("int")) {
             return null;
         }
 

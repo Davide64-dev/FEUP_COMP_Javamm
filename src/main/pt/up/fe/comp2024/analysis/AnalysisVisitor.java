@@ -17,11 +17,9 @@ import java.util.List;
  */
 public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Void> implements AnalysisPass {
 
-    private List<Report> reports;
-
     public static final List<String> ARITHMETIC_OPERATORS = Arrays.asList("*", "/", "-", "+", "<");
-
     public static final List<String> BOOLEAN_OPERATORS = Arrays.asList("&&", "||");
+    private final List<Report> reports;
 
     public AnalysisVisitor() {
         reports = new ArrayList<>();
@@ -52,8 +50,8 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             if (table.getParameters(currentMethod).stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
 
-                for (var symbol : table.getParameters(currentMethod)){
-                    if (symbol.getName().equals(variable.get("name"))){
+                for (var symbol : table.getParameters(currentMethod)) {
+                    if (symbol.getName().equals(variable.get("name"))) {
                         return symbol.getType();
                     }
                 }
@@ -64,10 +62,10 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             if (table.getLocalVariables(currentMethod).stream()
                     .anyMatch(varDecl -> varDecl.getName().equals(variable.get("name")))) {
 
-                List<Symbol> symbols =table.getLocalVariables(currentMethod);
+                List<Symbol> symbols = table.getLocalVariables(currentMethod);
 
-                for (var symbol : symbols){
-                    if (symbol.getName().equals(variable.get("name"))){
+                for (var symbol : symbols) {
+                    if (symbol.getName().equals(variable.get("name"))) {
                         return symbol.getType();
                     }
                 }
@@ -76,8 +74,8 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             if (table.getFields().stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
 
-                for (var symbol : table.getFields()){
-                    if (symbol.getName().equals(variable.get("name"))){
+                for (var symbol : table.getFields()) {
+                    if (symbol.getName().equals(variable.get("name"))) {
                         return symbol.getType();
                     }
                 }
@@ -86,53 +84,50 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         }
 
         // If the value is const
-        if (variable.getKind().equals(Kind.CONST.toString())){
-            if (variable.get("name").equals("true") || variable.get("name").equals("false")){
+        if (variable.getKind().equals(Kind.CONST.toString())) {
+            if (variable.get("name").equals("true") || variable.get("name").equals("false")) {
                 return new Type("boolean", false);
-            } else{
+            } else {
                 return new Type("int", false);
             }
         }
 
         // If the value is another node
-        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())){
+        if (variable.getKind().equals(Kind.BINARY_EXPR.toString())) {
             var operator = variable.get("name");
-            if (ARITHMETIC_OPERATORS.contains(operator) && !operator.equals("<")){
+            if (ARITHMETIC_OPERATORS.contains(operator) && !operator.equals("<")) {
                 return new Type("int", false);
             }
             return new Type("boolean", false);
         }
 
         // If the variable is a function
-        if (variable.getKind().equals(Kind.METHOD_CALL.toString())){
-            var methods =table.getMethods();
+        if (variable.getKind().equals(Kind.METHOD_CALL.toString())) {
+            var methods = table.getMethods();
 
-            for (var method : methods){
-                if (method.equals(variable.get("name"))){
+            for (var method : methods) {
+                if (method.equals(variable.get("name"))) {
                     return table.getReturnType(method);
                 }
             }
         }
 
-        if (variable.getKind().equals(Kind.NEW_OBJECT.toString())){
+        if (variable.getKind().equals(Kind.NEW_OBJECT.toString())) {
             var type = variable.getChild(0);
             return new Type(type.get("name"), false);
         }
 
-        if (variable.getKind().equals("ArrayAccess")){
+        if (variable.getKind().equals("ArrayAccess")) {
             return new Type("int", false);
         }
 
-        if (variable.getKind().equals("Length")){
+        if (variable.getKind().equals("Length")) {
             return new Type("int", false);
         }
 
-        if (variable.getKind().equals(Kind.NEW_ARRAY.toString()) || variable.getKind().equals(Kind.ARRAY_CALL.toString())){
+        if (variable.getKind().equals(Kind.NEW_ARRAY.toString()) || variable.getKind().equals(Kind.ARRAY_CALL.toString())) {
             return new Type("int", true);
         }
-
-
-
 
 
         return new Type("", false);

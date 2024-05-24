@@ -1,7 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
-import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -9,13 +8,10 @@ import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class IncompatibleReturn extends AnalysisVisitor {
 
     private String currentMethod;
+
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
@@ -26,7 +22,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
 
-        if (method.getDescendants(Kind.RET_STMT).isEmpty() && !currentMethod.equals("main")){
+        if (method.getDescendants(Kind.RET_STMT).isEmpty() && !currentMethod.equals("main")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(method),
@@ -36,9 +32,9 @@ public class IncompatibleReturn extends AnalysisVisitor {
             );
         }
 
-        if (currentMethod.equals("main")){
-            if (method.getChild(1).getChild(0).get("name").equals("String")){
-                if (method.getChild(1).getChild(0).get("isArray").equals("true")){
+        if (currentMethod.equals("main")) {
+            if (method.getChild(1).getChild(0).get("name").equals("String")) {
+                if (method.getChild(1).getChild(0).get("isArray").equals("true")) {
                     return null;
                 }
             }
@@ -50,7 +46,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
                     null)
             );
 
-            if (!method.getDescendants(Kind.THIS).isEmpty()){
+            if (!method.getDescendants(Kind.THIS).isEmpty()) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(method),
@@ -66,7 +62,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
     private Void visitReturn(JmmNode assignExpr, SymbolTable table) {
 
-        if (assignExpr.getParent().getChildren(Kind.RET_STMT).size() > 1){
+        if (assignExpr.getParent().getChildren(Kind.RET_STMT).size() > 1) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignExpr),
@@ -76,7 +72,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
             );
         }
 
-        if (assignExpr.getParent().getChild(assignExpr.getParent().getChildren().size() - 1) != assignExpr){
+        if (assignExpr.getParent().getChild(assignExpr.getParent().getChildren().size() - 1) != assignExpr) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignExpr),
@@ -91,11 +87,11 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
         var returnTypeExpected = table.getReturnType(currentMethod);
 
-        if (returnTypeExpected.getName().equals(returnTypeActual.getName())){
+        if (returnTypeExpected.getName().equals(returnTypeActual.getName())) {
             if (returnTypeExpected.isArray() == returnTypeActual.isArray()) return null;
         }
 
-        var message = String.format("Return types are not compatible");
+        var message = "Return types are not compatible";
 
         addReport(Report.newError(
                 Stage.SEMANTIC,

@@ -4,10 +4,12 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.Kind;
-import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -16,7 +18,7 @@ public class JmmSymbolTableBuilder {
 
     public static JmmSymbolTable build(JmmNode root) {
 
-        var classDecl = root.getJmmChild(root.getChildren().size()-1);
+        var classDecl = root.getJmmChild(root.getChildren().size() - 1);
 
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("name");
@@ -31,7 +33,7 @@ public class JmmSymbolTableBuilder {
         String superClass;
         try {
             superClass = classDecl.get("superClass");
-        } catch(NullPointerException e){
+        } catch (NullPointerException e) {
             superClass = "";
         }
 
@@ -53,11 +55,11 @@ public class JmmSymbolTableBuilder {
         return fields;
     }
 
-    private static List<String> buildImports(JmmNode root){
+    private static List<String> buildImports(JmmNode root) {
         int size = root.getChildren().size();
         List<String> res = new ArrayList<>();
 
-        for (int i = 0; i < size - 1; i++){
+        for (int i = 0; i < size - 1; i++) {
             res.add(root.getChild(i).get("lib"));
         }
 
@@ -79,11 +81,11 @@ public class JmmSymbolTableBuilder {
         Map<String, List<Symbol>> map = new HashMap<>();
         List<JmmNode> methods = classDecl.getChildren(METHOD_DECL);
 
-        for (JmmNode method : methods){
+        for (JmmNode method : methods) {
             var methodName = method.get("name");
             var params = new ArrayList<Symbol>();
             List<JmmNode> paramNodes = method.getChildren(PARAM);
-            for (JmmNode param : paramNodes){
+            for (JmmNode param : paramNodes) {
                 var paramName = param.get("name");
                 var type = new Type(param.getChild(0).get("name"), Boolean.parseBoolean(param.getChild(0).get("isArray")) || Boolean.parseBoolean(param.get("isVarArg")));
                 params.add(new Symbol(type, paramName));
@@ -119,7 +121,7 @@ public class JmmSymbolTableBuilder {
 
         var vars = new ArrayList<Symbol>();
         List<JmmNode> varsDec = methodDecl.getChildren(VAR_DECL);
-        for (JmmNode variable : varsDec){
+        for (JmmNode variable : varsDec) {
             var variableName = variable.get("name");
             var type = new Type(variable.getChild(0).get("name"), Boolean.parseBoolean(variable.getChild(0).get("isArray")));
             vars.add(new Symbol(type, variableName));
