@@ -124,24 +124,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             invokeType = "invokestatic";
         }
 
+        List<String> tempVars = new ArrayList<>();
 
         for (int i = 1; i < node.getNumChildren(); i++) {
             JmmNode argumentNode = node.getChild(i);
             var temp = exprVisitor.visit(argumentNode);
-            // need to get argument type
             functionCall.append(temp.getComputation());
+            tempVars.add(temp.getCode());
         }
         // Append the method invocation to the functionCall StringBuilder
         functionCall.append(String.format("%s(%s, \"%s\"", invokeType, object, name));
 
         try {
             // Append method arguments if available
-
             for (int i = 1; i < node.getNumChildren(); i++) {
                 JmmNode argumentNode = node.getChild(i);
-                var temp = exprVisitor.visit(argumentNode);
-                // need to get argument type
-                functionCall.append(",").append(temp.getCode());
+                functionCall.append(",").append(tempVars.get(i - 1));
             }
         } catch (NullPointerException e) {}
 

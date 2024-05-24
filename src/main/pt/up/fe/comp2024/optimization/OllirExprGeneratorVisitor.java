@@ -267,7 +267,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // code to compute self
         Type resType = TypeUtils.getExprType(node, table);
         String resOllirType = OptUtils.toOllirType(resType);
-        String code = OptUtils.getTemp() + resOllirType;
+
+        String code;
+        if (!computation.equals("")) {
+            code = OptUtils.getTemp() + resOllirType;
+        }
+        else{
+            code = rhs.getCode();
+        }
 
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE)
