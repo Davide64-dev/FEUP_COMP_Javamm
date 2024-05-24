@@ -368,11 +368,7 @@ public class JasminGenerator {
                     yield convertImport(((Operand) callInstruction.getCaller()).getName());
                 }
             }
-            default -> {
-                // System.out.println("Instruction is: " + callInstruction);
-                // throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
-                yield "";
-            }
+            default -> "";
         };
 
         String inst;
@@ -446,7 +442,6 @@ public class JasminGenerator {
     private String generateOpCondInstruction(OpCondInstruction opCondInstruction) {
         var code = new StringBuilder();
 
-        var instType = opCondInstruction.getInstType();
         var inst = opCondInstruction.getCondition();
         var leftOp = ((BinaryOpInstruction) inst).getLeftOperand();
         var rightOp = ((BinaryOpInstruction) inst).getRightOperand();
