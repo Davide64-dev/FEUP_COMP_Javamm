@@ -368,11 +368,7 @@ public class JasminGenerator {
                     yield convertImport(((Operand) callInstruction.getCaller()).getName());
                 }
             }
-            default -> {
-                // System.out.println("Instruction is: " + callInstruction);
-                // throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
-                yield "";
-            }
+            default -> "";
         };
 
         String inst;
