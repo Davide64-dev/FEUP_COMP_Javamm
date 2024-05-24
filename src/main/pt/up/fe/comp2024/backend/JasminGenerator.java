@@ -10,7 +10,11 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.specs.comp.ollir.OperationType.ADD;
 
 /**
  * Generates Jasmin code from an OllirResult.
@@ -249,14 +253,25 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: I think this is good and supports all possible types, but not sure
-        code.append(
-            switch (assign.getTypeOfAssign().getTypeOfElement()) {
+        String instr;
+        if (reg > 3){
+            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
                 case OBJECTREF -> "astore ";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
-            }
-        ).append(reg).append(NL);
+            };
+        }
+
+        else{
+            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+                case INT32, BOOLEAN -> "istore_";
+                case OBJECTREF -> "astore_";
+                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
+            };
+        }
+
+        // TODO: I think this is good and supports all possible types, but not sure
+        code.append(instr).append(reg).append(NL);
 
         return code.toString();
     }
@@ -377,7 +392,22 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        return "ldc " + literal.getLiteral() + NL;
+        try {
+            int value = Integer.parseInt(literal.getLiteral());
+            if (value >= -128 && value <= 127) {
+                return "bipush " + value + NL;
+
+            } else if (value >= -32768 && value <= 32767){
+                return "sipush " + value + NL;
+            }
+            else {
+                return "ldc " + value + NL;
+            }
+
+        } catch (NumberFormatException e){
+            return "ldc " + literal.getLiteral() + NL;
+        }
+
     }
 
     private String generateOperand(Operand operand) {
@@ -385,16 +415,43 @@ public class JasminGenerator {
         var varType = currentMethod.getVarTable().get(operand.getName()).getVarType();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        String loadInst = switch (varType.getTypeOfElement()) {
-            case INT32, BOOLEAN -> "iload ";
-            default -> "aload ";
-        };
+        String loadInst;
+        if (reg > 3) {
+            loadInst = switch (varType.getTypeOfElement()) {
+                case INT32, BOOLEAN -> "iload ";
+                default -> "aload ";
+            };
+        }
+        else {
+            loadInst = switch (varType.getTypeOfElement()) {
+                case INT32, BOOLEAN -> "iload_";
+                default -> "aload_";
+            };
+        }
 
         return loadInst + reg + NL; // this NL should NOT be removed
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
+        String regexPattern = "iload_(\\d+)|iload (\\d+)";
+        Pattern pattern = Pattern.compile(regexPattern);
+
+        if (generators.apply(binaryOp.getRightOperand()).substring(0, generators.apply(binaryOp.getRightOperand()).length()-1).equals("bipush 1")){
+            System.out.println("bipush found");
+            Matcher matcher = pattern.matcher(generators.apply(binaryOp.getLeftOperand()));
+            if (matcher.find()){
+                return "iinc " + matcher.group(1) + " " + 1  + NL;
+            }
+        }
+
+        if (generators.apply(binaryOp.getLeftOperand()).substring(0, generators.apply(binaryOp.getLeftOperand()).length()-1).equals("bipush 1")){
+            System.out.println("bipsuh found");
+            Matcher matcher = pattern.matcher(generators.apply(binaryOp.getRightOperand()));
+            if (matcher.find()){
+                return "iinc " + matcher.group(1) + NL;
+            }
+        }
 
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));

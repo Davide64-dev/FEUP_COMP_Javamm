@@ -38,11 +38,20 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(NEW_ARRAY, this::visitNewArray);
         addVisit(ARRAY_ACCESS, this::visitArrayAcess);
         addVisit(LENGTH, this::visitLength);
+        addVisit(NOT_OP, this::visitNotOp);
         addVisit(ARRAY_CALL, this::visitArrayCall);
-
         setDefaultVisit(this::defaultVisit);
     }
 
+    private OllirExprResult visitNotOp(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+
+
+        computation.append(visit(node.getJmmChild(0)).getCode());
+
+        var code = "!.bool " + computation;
+        return new OllirExprResult(code, computation);
+    }
     private OllirExprResult visitArrayCall(JmmNode node, Void unused){
         var typeName = node.getChild(0).get("name");
 
@@ -117,6 +126,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(child.getComputation());
 
         var length = visit(node.getChild(1));
+
+        //computation.append(tempVar).append(".array.i32 := .array.i32 new(array, ").append(5).append(".i32).array.i32;\n");
 
         computation.append(tempVar).append(".array.i32 := .array.i32 new(array,").append(length.getCode()).append(").array.i32;\n");
 
@@ -236,7 +247,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             return new OllirExprResult(code);
         }
         else{
-            String code = node.get("name") + "boolean";
+            String code = node.get("name") + ".bool";
             return new OllirExprResult(code);
         }
     }

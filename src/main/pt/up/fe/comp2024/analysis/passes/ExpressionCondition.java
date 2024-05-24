@@ -47,9 +47,9 @@ public class ExpressionCondition  extends AnalysisVisitor {
 
         // If it is a binary expression, it must be < && or ||
         if (condition.getKind().equals(Kind.BINARY_EXPR.toString())){
-            if (condition.getChild(1).get("name").equals("<") ||
-                    condition.getChild(1).get("name").equals("&&") ||
-                    condition.getChild(1).get("name").equals("||")){
+            if (condition.get("name").equals("<") ||
+                    condition.get("name").equals("&&") ||
+                    condition.get("name").equals("||")){
                 // Condition is a boolean expression, return
                 return null;
             }
