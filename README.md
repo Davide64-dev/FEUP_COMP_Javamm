@@ -6,13 +6,13 @@ Contains a reference implementation for an initial version of the project that s
 
 - Ruby (upxxxxxxxxx@edu.fe.up.pt)
 - Emanuel Rui Tavano Maia (up202107486@edu.fe.up.pt)
-- Kana (upxxxxxxxxx@edu.fe.up.pt)
+- Maria Mitkou (up202311354@edu.fe.up.pt)
 
 ## Work Distribution
 
-- Aqua - 33.33 %
-- Ruby - 33.33 %
-- Kana - 33.33 %
+- David - 33.33 %
+- Emanuel - 33.33 %
+- Maria - 33.33 %
 
 ## Self-Assessment
 
