@@ -546,10 +546,10 @@ public class JasminGenerator {
             case SUB -> "isub";
             case DIV -> "idiv";
             // boolean
-            /*case LTH -> "if_icmplt";
-            case GTE -> "if_icmpte";*/
-            case LTH -> "isub\niflt";
-            case GTE -> "isub\nifle";
+            case LTH -> "if_icmplt";
+            case GTE -> "if_icmpte";
+            /*case LTH -> "isub\niflt";
+            case GTE -> "isub\nifle";*/
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         }).append(NL);
 
@@ -604,7 +604,6 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: not sure if all types are correct/covered
         switch(currentMethod.getReturnType().getTypeOfElement()) {
             case VOID:
                 code.append("return").append(NL);
