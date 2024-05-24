@@ -26,8 +26,6 @@ public class UndeclaredMethod extends AnalysisVisitor {
 
     private Void visitMethodCallExpr(JmmNode methodRefExpr, SymbolTable table) {
 
-        System.out.println("Method Found");
-
         var className = methodRefExpr.getAncestor(Kind.CLASS_DECL).get().get("name");
 
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
@@ -36,10 +34,7 @@ public class UndeclaredMethod extends AnalysisVisitor {
         var methodRefName = methodRefExpr.get("name");
 
         if (currentMethod.equals("main")){
-            if (methodRefExpr.get("is_this").equals("true")){
-
-
-
+            if (methodRefExpr.get("is_this").equals("true")) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(methodRefExpr),
@@ -53,7 +48,6 @@ public class UndeclaredMethod extends AnalysisVisitor {
         // Var is a field, return
         if (table.getMethods().stream()
                 .anyMatch(method -> method.equals(methodRefName))) {
-            System.out.println("Method is Declared, return");
             return null;
         }
 
@@ -71,10 +65,7 @@ public class UndeclaredMethod extends AnalysisVisitor {
         if (!table.getSuper().isEmpty()) return null;
 
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("Method '%s' does not exist.", methodRefName);
-
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
@@ -84,8 +75,7 @@ public class UndeclaredMethod extends AnalysisVisitor {
                 null)
         );
 
-
-
         return null;
     }
+
 }

@@ -30,8 +30,6 @@ public class MethodCallParameters extends AnalysisVisitor {
 
     private Void visitMethodCallExpr(JmmNode methodRefExpr, SymbolTable table) {
 
-        System.out.println("Method Found");
-
         var className = methodRefExpr.getAncestor(Kind.CLASS_DECL).get().get("name");
 
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
@@ -92,8 +90,6 @@ public class MethodCallParameters extends AnalysisVisitor {
 
         try {
             if (methodParams.get(methodParams.size() - 1).getType().isArray()) {
-                // ignore
-                System.out.println("It has varargs");
                 return null;
             }
         } catch (IndexOutOfBoundsException e) { }
@@ -132,7 +128,6 @@ public class MethodCallParameters extends AnalysisVisitor {
         if (alright) return null;
 
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("Argumets do are not compatible", methodRefName);
 
         addReport(Report.newError(

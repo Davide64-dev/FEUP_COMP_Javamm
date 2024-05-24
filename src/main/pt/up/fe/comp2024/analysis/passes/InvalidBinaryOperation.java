@@ -33,15 +33,9 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
 
     private Void visitBinaryExpr(JmmNode binaryRefExpr, SymbolTable table) {
 
-        System.out.println("Binary Expression Found");
-
         var operator = binaryRefExpr.getChild(1);
-
         var leftOperand = binaryRefExpr.getChild(0);
-
         var rightOperand = binaryRefExpr.getChild(1);
-
-
         var leftType = getVariableType(leftOperand, table, currentMethod);
         var rightType = getVariableType(rightOperand, table, currentMethod);
 
@@ -51,12 +45,8 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
             }
         }
 
-
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("Operation '%s' requires two objects of the same time", operator.get("name"));
-
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
@@ -66,10 +56,7 @@ public class InvalidBinaryOperation extends AnalysisVisitor {
                 null)
         );
 
-
         return null;
-
-
     }
-}
 
+}

@@ -40,8 +40,6 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
 
-        System.out.println("Semantic Analysis Started");
-
         JmmNode rootNode = parserResult.getRootNode();
 
         SymbolTable table = JmmSymbolTableBuilder.build(rootNode);
@@ -52,14 +50,11 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         // Visit all nodes in the AST
         for (var analysisPass : analysisPasses) {
             try {
-                System.out.println("-----Pass " + i + "-----");
                 var passReports = analysisPass.analyze(rootNode, table);
                 reports.addAll(passReports);
                 i++;
                 if (!reports.isEmpty()) break;
             } catch (Exception e) {
-                System.out.println(e);
-                System.out.println("Unable to make Analysis Pass");
 
                 reports.add(Report.newError(Stage.SEMANTIC,
                         -1,
@@ -67,12 +62,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                         "Problem while executing analysis pass '" + analysisPass.getClass() + "'",
                         e)
                 );
-
-
-
-                System.out.println("--------Error--------\n");
             }
-
         }
 
         return new JmmSemanticsResult(parserResult, table, reports);

@@ -46,14 +46,9 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         return getReports();
     }
 
-    protected Type getVariableType(JmmNode variable, SymbolTable table, String currentMethod){
-        System.out.println("Arithmetic Operation");
-
-
+    protected Type getVariableType(JmmNode variable, SymbolTable table, String currentMethod) {
         // If the value is a variable
-        if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())){
-
-
+        if (variable.getKind().equals(Kind.VAR_REF_EXPR.toString())) {
             if (table.getParameters(currentMethod).stream()
                     .anyMatch(param -> param.getName().equals(variable.get("name")))) {
 
@@ -62,6 +57,7 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
                         return symbol.getType();
                     }
                 }
+
                 return null;
             }
 
@@ -93,8 +89,7 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         if (variable.getKind().equals(Kind.CONST.toString())){
             if (variable.get("name").equals("true") || variable.get("name").equals("false")){
                 return new Type("boolean", false);
-            }
-            else{
+            } else{
                 return new Type("int", false);
             }
         }
@@ -105,11 +100,7 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
             if (ARITHMETIC_OPERATORS.contains(operator) && !operator.equals("<")){
                 return new Type("int", false);
             }
-
-            else{
-                return new Type("boolean", false);
-            }
-
+            return new Type("boolean", false);
         }
 
         // If the variable is a function

@@ -30,8 +30,6 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
     private Void visitArrayAccess(JmmNode arrayExpr, SymbolTable table) {
 
-        System.out.println("Array Access Found");
-
         //SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference

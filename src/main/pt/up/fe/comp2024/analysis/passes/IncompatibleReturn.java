@@ -56,8 +56,6 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
     private Void visitReturn(JmmNode assignExpr, SymbolTable table) {
 
-        System.out.println("Return stmt found");
-
         if (assignExpr.getParent().getChildren(Kind.RET_STMT).size() > 1){
             addReport(Report.newError(
                     Stage.SEMANTIC,

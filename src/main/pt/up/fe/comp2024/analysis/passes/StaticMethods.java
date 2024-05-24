@@ -10,6 +10,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+
 public class StaticMethods extends AnalysisVisitor {
 
     private String currentMethod;
@@ -32,8 +33,7 @@ public class StaticMethods extends AnalysisVisitor {
             if (temp.get("isStatic").equals("false")) {
                 return null;
             }
-        } catch (NullPointerException e) {
-        }
+        } catch (NullPointerException e) { }
 
         for (var field : table.getFields()){
             if (field.getName().equals(varExpr.get("name"))){
@@ -57,24 +57,17 @@ public class StaticMethods extends AnalysisVisitor {
 
     private Void visitThis(JmmNode thisExpr, SymbolTable table) {
 
-        System.out.println("Variable Found!");
-
         var temp = thisExpr.getAncestor(Kind.METHOD_DECL).get();
-
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         try {
             if (temp.get("isStatic").equals("false")) {
                 return null;
             }
-        } catch (NullPointerException e) {
-
-        }
+        } catch (NullPointerException e) { }
 
         // Create error report
-        System.out.println("There was an error");
         var message = "Can't use keyword this on static methods";
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
