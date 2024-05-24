@@ -7,14 +7,11 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.specs.comp.ollir.OperationType.ADD;
 
 /**
  * Generates Jasmin code from an OllirResult.
@@ -57,6 +54,10 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(CallInstruction.class, this::generateCallInstruction);
+        generators.put(OpCondInstruction.class, this::generateOpCondInstruction);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCondInstruction);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOpInstruction);
+        generators.put(GotoInstruction.class, this::generateGotoInstruction);
     }
 
     public List<Report> getReports() {
@@ -70,9 +71,10 @@ public class JasminGenerator {
             code = generators.apply(ollirResult.getOllirClass());
         }
 
+        // for debug
+        System.out.println(code);
         return code;
     }
-
 
     private String generateClassUnit(ClassUnit classUnit) {
 
@@ -158,6 +160,18 @@ public class JasminGenerator {
         );
     }
 
+    private String generateLimitLocals() {
+        int registerCount = 0;
+        for (var reg: currentMethod.getVarTable().values()) {
+            if (reg.getVirtualReg() > registerCount) {
+                registerCount = reg.getVirtualReg();
+            }
+        }
+        registerCount++; // add one because register numbers start at 0
+
+        return String.format(".limit locals %s", registerCount);
+    }
+
     private String generateMethod(Method method) {
         // set method
         currentMethod = method;
@@ -194,9 +208,16 @@ public class JasminGenerator {
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
+        // code.append(TAB).append(".limit locals 99").append(NL);
+        code.append(TAB).append(generateLimitLocals()).append(NL);
 
         for (var inst : method.getInstructions()) {
+            // check for labels
+            method.getLabels().entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(inst))
+                    .findFirst()
+                    .ifPresent(entry -> code.append(String.format("%s:\n", entry.getKey())));
+
             // if an invoke virtual or invoke static instruction is being called
             // from here, it will need pop, since that means it's not in an assignment
             // (IFF it is not void, aka doesn't return anything)
@@ -245,7 +266,6 @@ public class JasminGenerator {
         // store value in the stack in destination
         var lhs = assign.getDest();
 
-        // TODO: What is this?
         if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
@@ -253,25 +273,22 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        String instr;
+        String inst;
         if (reg > 3){
-            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore ";
-                case OBJECTREF -> "astore ";
+                case OBJECTREF, ARRAYREF -> "astore ";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             };
-        }
-
-        else{
-            instr = switch (assign.getTypeOfAssign().getTypeOfElement()) {
+        } else {
+            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
                 case INT32, BOOLEAN -> "istore_";
-                case OBJECTREF -> "astore_";
+                case OBJECTREF, ARRAYREF -> "astore_";
                 default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
             };
         }
 
-        // TODO: I think this is good and supports all possible types, but not sure
-        code.append(instr).append(reg).append(NL);
+        code.append(inst).append(reg).append(NL);
 
         return code.toString();
     }
@@ -328,6 +345,8 @@ public class JasminGenerator {
             case NEW, invokespecial -> {
                 if (typeOfElement == ElementType.THIS) {
                     yield ((ClassType) callInstruction.getCaller().getType()).getName();
+                } else if (typeOfElement == ElementType.ARRAYREF) {
+                    yield convertImport(((ArrayType) callInstruction.getCaller().getType()).toString());
                 } else {
                     yield convertImport(((ClassType) callInstruction.getCaller().getType()).getName());
                 }
@@ -339,11 +358,16 @@ public class JasminGenerator {
                     yield convertImport(((Operand) callInstruction.getCaller()).getName());
                 }
             }
-            default -> throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
+            default -> {
+                // System.out.println("Instruction is: " + callInstruction);
+                // throw new IllegalArgumentException("Unknown invocation type: " + invocationType);
+                yield "";
+            }
         };
 
         String inst;
-        if (invocationType == CallType.NEW) {
+
+        if (invocationType == CallType.NEW && typeOfElement != ElementType.ARRAYREF) {
             inst = "new " + methodClassName;
             code.append(inst).append(NL);
             code.append("dup");
@@ -365,18 +389,36 @@ public class JasminGenerator {
             loadInstructions.append(op);
         }
 
-        String methodName = ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
-        if (invocationType == CallType.invokespecial) methodName = "<init>"; // I'm not sure if invokespecial is always a constructor but this works for now
-        String returnType = convertType(callInstruction.getReturnType());
-        inst = String.format(
-                "%s%s %s/%s(%s)%s",
-                loadInstructions,
-                callInstruction.getInvocationType().toString(),
-                convertImport(methodClassName),
-                methodName,
-                arguments,
-                returnType
-        );
+        if (invocationType == CallType.NEW && typeOfElement == ElementType.ARRAYREF) {
+            inst = "newarray int";
+            code.append(loadInstructions).append(NL);
+            code.append(inst).append(NL);
+            return code.toString();
+        }
+
+        if (invocationType == CallType.arraylength) {
+            inst = String.format(
+                    "%s\n%s\n%s\n",
+                    generators.apply(callInstruction.getCaller()),
+                    "arraylength",
+                    loadInstructions
+            );
+        } else {
+            String methodName = switch (invocationType) {
+                case invokespecial -> "<init>";
+                default -> ((LiteralElement) callInstruction.getMethodName()).getLiteral().replace("\"", "");
+            };
+            String returnType = convertType(callInstruction.getReturnType());
+            inst = String.format(
+                    "%s%s %s/%s(%s)%s",
+                    loadInstructions,
+                    callInstruction.getInvocationType().toString(),
+                    convertImport(methodClassName),
+                    methodName,
+                    arguments,
+                    returnType
+            );
+        }
         code.append(inst).append(NL);
 
         if (needsPop) {
@@ -391,23 +433,63 @@ public class JasminGenerator {
         return generators.apply(singleOp.getSingleOperand());
     }
 
+    private String generateOpCondInstruction(OpCondInstruction opCondInstruction) {
+        var code = new StringBuilder();
+
+        var instType = opCondInstruction.getInstType();
+        var inst = opCondInstruction.getCondition();
+        var leftOp = ((BinaryOpInstruction) inst).getLeftOperand();
+        var rightOp = ((BinaryOpInstruction) inst).getRightOperand();
+        var opType = ((OpInstruction) inst).getOperation().getOpType();
+
+        // maybe merge these and change only the if
+        if (opType == OperationType.LTH) {
+            code.append(generators.apply(leftOp))
+                .append(generators.apply(rightOp))
+                .append("if_icmplt ").append(opCondInstruction.getLabel())
+                .append(NL);
+        } else if (opType == OperationType.GTE) {
+            code.append(generators.apply(leftOp))
+                    .append(generators.apply(rightOp))
+                    .append("if_icmpge ").append(opCondInstruction.getLabel())
+                    .append(NL);
+        }
+        return code.toString();
+    }
+
+    private String generateSingleOpCondInstruction(SingleOpCondInstruction singleOpCondInstruction) {
+        return String.format("%s\nifne %s", generators.apply(singleOpCondInstruction.getCondition()),singleOpCondInstruction.getLabel());
+    }
+
+    private String generateGotoInstruction(GotoInstruction gotoInstruction) {
+        return String.format("goto %s", gotoInstruction.getLabel());
+    }
+
+    private String generateUnaryOpInstruction(UnaryOpInstruction unaryOpInstruction) {
+        var code = new StringBuilder();
+
+        if (unaryOpInstruction.getOperation().getOpType() == OperationType.NOTB) {
+            code.append(String.format("iconst_1\n%sixor\n",
+                    generators.apply(unaryOpInstruction.getOperand())
+            ));
+        }
+
+        return code.toString();
+    }
+
     private String generateLiteral(LiteralElement literal) {
         try {
             int value = Integer.parseInt(literal.getLiteral());
             if (value >= -128 && value <= 127) {
                 return "bipush " + value + NL;
-
             } else if (value >= -32768 && value <= 32767){
                 return "sipush " + value + NL;
-            }
-            else {
+            } else {
                 return "ldc " + value + NL;
             }
-
         } catch (NumberFormatException e){
             return "ldc " + literal.getLiteral() + NL;
         }
-
     }
 
     private String generateOperand(Operand operand) {
@@ -421,8 +503,7 @@ public class JasminGenerator {
                 case INT32, BOOLEAN -> "iload ";
                 default -> "aload ";
             };
-        }
-        else {
+        } else {
             loadInst = switch (varType.getTypeOfElement()) {
                 case INT32, BOOLEAN -> "iload_";
                 default -> "aload_";
@@ -433,6 +514,30 @@ public class JasminGenerator {
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
+        var code = new StringBuilder();
+
+        // load values on the left and on the right
+        code.append(generators.apply(binaryOp.getLeftOperand()));
+        code.append(generators.apply(binaryOp.getRightOperand()));
+
+        // apply operation
+        code.append(switch (binaryOp.getOperation().getOpType()) {
+            // arithmetic
+            case ADD -> "iadd";
+            case MUL -> "imul";
+            case SUB -> "isub";
+            case DIV -> "idiv";
+            // boolean
+            case LTH -> "if_icmplt";
+            case GTE -> "if_icmpte";
+            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
+        }).append(NL);
+
+        return code.toString();
+    }
+
+    // "optimized" version that doesn't work
+    /* private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
         String regexPattern = "iload_(\\d+)|iload (\\d+)";
         Pattern pattern = Pattern.compile(regexPattern);
@@ -459,17 +564,22 @@ public class JasminGenerator {
 
         // apply operation
         var op = switch (binaryOp.getOperation().getOpType()) {
+            // arithmetic
             case ADD -> "iadd";
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
+            // boolean
+            // case LTH ->
+            case LTH -> "if_icmplt";
+            case GTE -> "if_icmpte";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
         code.append(op).append(NL);
 
         return code.toString();
-    }
+    } */
 
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();

@@ -20,6 +20,6 @@ Arithmetic_less{
       if_0:
       invokestatic(io, "print", 1.i32).V;
       endif_0:
-      ret.V ;
+      ret.V;
    }
 }

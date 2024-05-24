@@ -1,0 +1,9 @@
+import ioPlus;
+class HelloWorld {
+	public static void main(String[] args) {
+	    if (false) {
+        } else {
+            ioPlus.printHelloWorld();
+        }
+	}
+}

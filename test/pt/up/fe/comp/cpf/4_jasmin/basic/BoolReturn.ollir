@@ -1,0 +1,12 @@
+BoolReturn {
+
+    .construct Test().V {
+        invokespecial(this, "<init>").V;
+    }
+
+    .method public static main(args.array.String).V {
+        a.bool :=.bool 1.i32 <.bool 2.i32;
+        ret.V;
+    }
+
+}

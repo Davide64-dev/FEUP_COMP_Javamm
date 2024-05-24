@@ -20,6 +20,24 @@ public class AppTest {
     }
 
     @Test
+    public void testHelloWorldIfNotFalse() {
+        var code = SpecsIo.getResource("pt/up/fe/comp/cp2/apps/HelloWorldIfNotFalse.jmm");
+        var jasminResult = TestUtils.backend(code, Collections.emptyMap());
+        System.out.println(jasminResult.getJasminCode());
+        var result = TestUtils.runJasmin(jasminResult.getJasminCode(), Collections.emptyMap());
+        assertEquals("Hello, World!", result.strip());
+    }
+
+    @Test
+    public void testHelloWorldWhileLT5() {
+        var code = SpecsIo.getResource("pt/up/fe/comp/cp2/apps/HelloWorldWhileLT5.jmm");
+        var jasminResult = TestUtils.backend(code, Collections.emptyMap());
+        System.out.println(jasminResult.getJasminCode());
+        var result = TestUtils.runJasmin(jasminResult.getJasminCode(), Collections.emptyMap());
+        assertEquals("30", result.strip());
+    }
+
+    @Test
     public void testSimple() {
         var code = SpecsIo.getResource("pt/up/fe/comp/cp2/apps/Simple.jmm");
         var jasminResult = TestUtils.backend(code, Collections.emptyMap());

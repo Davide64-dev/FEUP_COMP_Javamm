@@ -93,6 +93,11 @@ public class Cpf4_Jasmin {
         CpUtils.matches(jasminResult, JASMIN_METHOD_REGEX_PREFIX + "\\[I");
     }
 
+    @Test
+    public void section1_BoolReturn() {
+        CpUtils.runJasmin(getJasminResult("basic/BoolReturn.ollir"), "true");
+    }
+
     /*checks if the index for loading a argument is correct (should be 1) */
     @Test
     public void section2_Arithmetic_BytecodeIndex_IloadArg() {
