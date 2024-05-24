@@ -4,8 +4,8 @@ Contains a reference implementation for an initial version of the project that s
 
 ## Group members
 
-- Aqua (upxxxxxxxxx@edu.fe.up.pt)
 - Ruby (upxxxxxxxxx@edu.fe.up.pt)
+- Emanuel Rui Tavano Maia (up202107486@edu.fe.up.pt)
 - Kana (upxxxxxxxxx@edu.fe.up.pt)
 
 ## Work Distribution
