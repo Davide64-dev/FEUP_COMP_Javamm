@@ -522,29 +522,24 @@ public class JasminGenerator {
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
+        var leftOp = generators.apply(binaryOp.getLeftOperand());
+        var rightOp = generators.apply(binaryOp.getRightOperand());
+        var opType = binaryOp.getOperation().getOpType();
 
-        // load values on the left and on the right
-
-        String code = generators.apply(binaryOp.getLeftOperand()) +
-                generators.apply(binaryOp.getRightOperand()) +
-
-                // apply operation
-                switch (binaryOp.getOperation().getOpType()) {
-                    // arithmetic
-                    case ADD -> "iadd";
-                    case MUL -> "imul";
-                    case SUB -> "isub";
-                    case DIV -> "idiv";
-                    // boolean
-                    case LTH -> "if_icmplt";
-                    case GTE -> "if_icmpte";
-            /*case LTH -> "isub\niflt";
-            case GTE -> "isub\nifle";*/
-                    default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-                } +
-                NL;
-
-        return code;
+        return leftOp +
+            rightOp +
+            switch (opType) {
+                // arithmetic
+                case ADD -> "iadd";
+                case MUL -> "imul";
+                case SUB -> "isub";
+                case DIV -> "idiv";
+                // boolean
+                case LTH -> "if_icmplt";
+                case GTE -> "if_icmpte";
+                default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
+            } +
+            NL;
     }
 
     // "optimized" version that doesn't work
