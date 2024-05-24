@@ -49,6 +49,7 @@ public class JasminGenerator {
         generators.put(SingleOpInstruction.class, this::generateSingleOp);
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
+        generators.put(ArrayOperand.class, this::generateArrayOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
@@ -207,7 +208,8 @@ public class JasminGenerator {
         code.append(returnType).append(NL);
 
         // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
+        code.append(TAB).append(".limit stack 20").append(NL);
+        // code.append(TAB).append(".limit stack 99").append(NL);
         // code.append(TAB).append(".limit locals 99").append(NL);
         code.append(TAB).append(generateLimitLocals()).append(NL);
 
@@ -254,14 +256,15 @@ public class JasminGenerator {
         // in this case we will need to pop
         // but if generateCallInstruction is being called from here, that means
         // the call instruction is part of an assignment, and therefore doesn't need pop
-        if (assign.getRhs() instanceof CallInstruction) {
-            var invType = ((CallInstruction) assign.getRhs()).getInvocationType();
+        var rhs = assign.getRhs();
+        if (rhs instanceof CallInstruction) {
+            var invType = ((CallInstruction) rhs).getInvocationType();
             if (invType == CallType.invokevirtual || invType == CallType.invokestatic) {
                 needsPop = false;
             }
         }
         // generate code for loading what's on the right
-        code.append(generators.apply(assign.getRhs()));
+        code.append(generators.apply(rhs));
 
         // store value in the stack in destination
         var lhs = assign.getDest();
@@ -270,22 +273,34 @@ public class JasminGenerator {
             throw new NotImplementedException(lhs.getClass());
         }
 
-        // get register
+        var varType = assign.getTypeOfAssign().getTypeOfElement();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         String inst;
-        if (reg > 3){
-            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
-                case INT32, BOOLEAN -> "istore ";
-                case OBJECTREF, ARRAYREF -> "astore ";
-                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
-            };
-        } else {
-            inst = switch (assign.getTypeOfAssign().getTypeOfElement()) {
-                case INT32, BOOLEAN -> "istore_";
-                case OBJECTREF, ARRAYREF -> "astore_";
-                default -> throw new NotImplementedException(assign.getTypeOfAssign().getTypeOfElement());
-            };
+        String end = reg > 3 ? " " : "_";
+        if (lhs instanceof ArrayOperand) { // esta merda n funciona** (funciona agora)
+            code.append(String.format(
+               "aload%s%s\n%s%s",
+               end,
+               reg,
+               generators.apply(((ArrayOperand) lhs).getIndexOperands().get(0)),
+               generators.apply(rhs)
+            ));
+        }
+
+        switch (varType) {
+            case INT32, BOOLEAN: {
+                if (currentMethod.getVarTable().get(operand.getName()).getVarType().getTypeOfElement() == ElementType.ARRAYREF) {
+                    code.append("iastore").append(NL);
+                    return code.toString();
+                }
+                inst = String.format("istore%s", end);
+                break;
+            }
+            default: {
+                inst = String.format("astore%s", end);
+                break;
+            }
         }
 
         code.append(inst).append(reg).append(NL);
@@ -492,25 +507,26 @@ public class JasminGenerator {
         }
     }
 
+    private String generateArrayOperand(ArrayOperand arrayOperand) {
+        var reg = currentMethod.getVarTable().get(arrayOperand.getName()).getVirtualReg();
+
+        String end = reg > 3 ? " " : "_";
+
+        return "aload" + end + reg + NL + generators.apply(arrayOperand.getIndexOperands().get(0)) + "iaload" + NL;
+    }
+
     private String generateOperand(Operand operand) {
-        // get register
         var varType = currentMethod.getVarTable().get(operand.getName()).getVarType();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         String loadInst;
-        if (reg > 3) {
-            loadInst = switch (varType.getTypeOfElement()) {
-                case INT32, BOOLEAN -> "iload ";
-                default -> "aload ";
-            };
-        } else {
-            loadInst = switch (varType.getTypeOfElement()) {
-                case INT32, BOOLEAN -> "iload_";
-                default -> "aload_";
-            };
-        }
+        String end = reg > 3 ? " " : "_";
+        loadInst = switch (varType.getTypeOfElement()) {
+            case INT32, BOOLEAN -> String.format("iload%s", end);
+            default -> String.format("aload%s", end);
+        };
 
-        return loadInst + reg + NL; // this NL should NOT be removed
+        return String.format("%s%s\n", loadInst, reg);
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
