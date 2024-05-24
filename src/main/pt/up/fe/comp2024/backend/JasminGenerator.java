@@ -495,14 +495,16 @@ public class JasminGenerator {
     private String generateLiteral(LiteralElement literal) {
         try {
             int value = Integer.parseInt(literal.getLiteral());
-            if (value >= -128 && value <= 127) {
+            if (value >= -1 && value <= 5) {
+                return "iconst_" + value + NL;
+            } else if (value >= -128 && value <= 127) {
                 return "bipush " + value + NL;
             } else if (value >= -32768 && value <= 32767){
                 return "sipush " + value + NL;
             } else {
                 return "ldc " + value + NL;
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return "ldc " + literal.getLiteral() + NL;
         }
     }
