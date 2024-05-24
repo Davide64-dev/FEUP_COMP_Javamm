@@ -100,7 +100,7 @@ public class InvalidAssign extends AnalysisVisitor {
         }
 
         if (getVariableType(assigned, table, currentMethod).isArray()){
-            if (getVariableType(assignee, table, currentMethod).isArray())
+            if(assignee.getKind().equals((Kind.ARRAY_CALL.toString())))
                 // Both arrays, return - Also check if it is an array of the same type
                 // Must loop to check all the elements of the array must be integers
                 //var nodeChildren = assignee.getChildren();
