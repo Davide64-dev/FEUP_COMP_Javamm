@@ -9,6 +9,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+
 public class InvalidParameters extends AnalysisVisitor {
 
     private String currentMethod;
@@ -20,18 +21,13 @@ public class InvalidParameters extends AnalysisVisitor {
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
-
         var params = method.getChildren(Kind.PARAM);
-
         var nParams = params.size();
 
-        for (int i = 0; i < nParams - 1; i++){
+        for (int i = 0; i < nParams - 1; i++) {
             var param = params.get(i);
-            if (param.get("isVarArg").equals("true")){
-
+            if (param.get("isVarArg").equals("true")) {
                 var message = String.format("Varargs can only be the last parameter");
-
-
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(method),
@@ -39,7 +35,6 @@ public class InvalidParameters extends AnalysisVisitor {
                         message,
                         null)
                 );
-
             }
         }
 
@@ -48,10 +43,7 @@ public class InvalidParameters extends AnalysisVisitor {
 
     private Void visitMethodCallExpr(JmmNode methodRefExpr, SymbolTable table) {
 
-        System.out.println("Method Found");
-
         var className = methodRefExpr.getAncestor(Kind.CLASS_DECL).get().get("name");
-
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
@@ -60,11 +52,10 @@ public class InvalidParameters extends AnalysisVisitor {
         // Var is a field, return
         if (table.getMethods().stream()
                 .anyMatch(method -> method.equals(methodRefName))) {
-            System.out.println("Method is Declared, return");
             return null;
         }
 
-        try{
+        try {
             var object = methodRefExpr.getChild(0);
             var debug = getVariableType(object, table, currentMethod).getName();
             if (!getVariableType(object, table, currentMethod).getName().equals("int") && !getVariableType(object, table, currentMethod).getName().equals("boolean")
@@ -73,15 +64,12 @@ public class InvalidParameters extends AnalysisVisitor {
                 return null;
             }
             // Must check here if the object is extendable and, with that, assum it is correct
-        } catch (NullPointerException e){}
+        } catch (NullPointerException e) { }
 
         if (!table.getSuper().isEmpty()) return null;
 
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("Method '%s' does not exist.", methodRefName);
-
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
@@ -90,8 +78,6 @@ public class InvalidParameters extends AnalysisVisitor {
                 message,
                 null)
         );
-
-
 
         return null;
     }

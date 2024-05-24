@@ -35,8 +35,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
 
-        System.out.println("Variable Found!");
-
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
@@ -45,21 +43,18 @@ public class UndeclaredVariable extends AnalysisVisitor {
         // Var is a field, return
         if (table.getFields().stream()
                 .anyMatch(param -> param.getName().equals(varRefName))) {
-            System.out.println("Var is a field, return");
             return null;
         }
 
         // Var is a parameter, return
         if (table.getParameters(currentMethod).stream()
                 .anyMatch(param -> param.getName().equals(varRefName))) {
-            System.out.println("Var is a parameter, return");
             return null;
         }
 
         // Var is a declared variable, return
         if (table.getLocalVariables(currentMethod).stream()
                 .anyMatch(varDecl -> varDecl.getName().equals(varRefName))) {
-            System.out.println("Var is a variable, return");
             return null;
         }
 
@@ -70,9 +65,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         }
 
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("Variable '%s' does not exist.", varRefName);
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,

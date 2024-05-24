@@ -38,7 +38,6 @@ public class InvalidAssign extends AnalysisVisitor {
 
         String lib = declaration.get("lib");
 
-        if (lib instanceof String) System.out.println("String");
         int lastIndex = lib.lastIndexOf(".");
         if (lastIndex == -1) {
             imports.add(lib.substring(1, lib.length() - 1));
@@ -69,8 +68,6 @@ public class InvalidAssign extends AnalysisVisitor {
     }
 
     private Void assignVariable(JmmNode assignExpr, SymbolTable table) {
-
-        System.out.println("Variable Assign found!");
 
         var assigned = assignExpr.getChild(0);
         var assignee = assignExpr.getChild(1);
@@ -159,13 +156,11 @@ public class InvalidAssign extends AnalysisVisitor {
         if (assigneeType.getName().isEmpty()) return null;
         if (isExtended) {
             if (superClass.equals(assignedType.getName())) {
-                System.out.println("One object extends the other");
                 return null;
             }
         }
 
         if (imports.contains(assigneeType.getName()) && imports.contains(assignedType.getName())){
-            System.out.println("Both imports, assume correct");
             return null;
         }
 

@@ -30,12 +30,8 @@ public class ExpressionCondition  extends AnalysisVisitor {
 
     private Void visitCondition(JmmNode stmt, SymbolTable table) {
 
-        System.out.println("Condition Found!");
-
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var condition = stmt.getChild(0);
-
-        System.out.println(condition);
 
         // If it is a constant - Must be true or false
         if (condition.getKind().equals(Kind.CONST.toString())){
@@ -90,9 +86,7 @@ public class ExpressionCondition  extends AnalysisVisitor {
         }
 
         // Create error report
-        System.out.println("There was an error");
         var message = String.format("'%s' is not a condition.", condition.toString());
-
 
         addReport(Report.newError(
                 Stage.SEMANTIC,
