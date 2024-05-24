@@ -11,7 +11,7 @@ Contains a reference implementation for an initial version of the project that s
 ## Work Distribution
 
 - Aqua - 33.33 %
-- Ruby - 33.33 %
+- Emanuel Rui Tavano Maia - 33.33 %
 - Kana - 33.33 %
 
 ## Self-Assessment
