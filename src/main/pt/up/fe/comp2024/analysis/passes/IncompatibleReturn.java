@@ -26,6 +26,16 @@ public class IncompatibleReturn extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
 
+        if (method.getDescendants(Kind.RET_STMT).isEmpty() && !currentMethod.equals("main")){
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "Method has to have a return statement",
+                    null)
+            );
+        }
+
         if (currentMethod.equals("main")){
             if (method.getChild(1).getChild(0).get("name").equals("String")){
                 if (method.getChild(1).getChild(0).get("isArray").equals("true")){

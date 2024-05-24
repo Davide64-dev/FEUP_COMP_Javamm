@@ -123,6 +123,13 @@ public class SemanticAnalysisTest {
     }
 
     @Test
+    public void importsComplexFail() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/ollir/importsComplexFail.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+    @Test
     public void incompatibleReturn() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleReturn.jmm"));

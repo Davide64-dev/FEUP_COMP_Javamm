@@ -1,0 +1,24 @@
+import io.x.fdvdvvsdv.wdjsvjhdvkvf;
+import temp.fe.up.pt.x.y.a.sedf.vrefverfdbdsfbf.twebfdssfewrebsfrv.ewfsbdvewdvnwedkvnbkawdnbv.vbeahbvjhvbaejvbjhebd;
+import edhvbqwjehbv.ewdvijbnehv.irkdv.jhevjbhvfejhvhvfhbvbhjdjhbvdfhdfv.vhbfvsbvbjdbdsjnbvnbjdv;
+import edhvbqwjehbv.ewdvijbnehv.irkdv.jhevjbhvfejhvhvfhbvbhjdjhbvdfhdfv.vhbfvsbvbjdbdsjnbvnbjdv;
+import edhvbqwjehbv.ewdvijbnehv.irkdv.jhevjbhvfejhvhvfhbvbhjdjhbvdfhdfv.wrjbvbhdvhbvdkhv.vhbfvsbvbjdbdsjnbvnbjdv;
+import edhvbqwjehbv.ewdvijbnehv.irkdv.jhevjbhvfejhvhvfhbvbhjdjhbvdfhdfv.wrjbvbhdvhbvdkhv.vhbfvsbvbjdbdsjnbvnbjdv;
+import vhbfvsbvbjdbdsjnbvnbjdv;
+
+class CompileMethodInvocation {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo() {
+        int a;
+
+        a = 1;
+
+        io.println(a);
+
+        return 0;
+    }
+}
