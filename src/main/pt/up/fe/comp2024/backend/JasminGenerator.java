@@ -546,8 +546,10 @@ public class JasminGenerator {
             case SUB -> "isub";
             case DIV -> "idiv";
             // boolean
-            case LTH -> "if_icmplt";
-            case GTE -> "if_icmpte";
+            /*case LTH -> "if_icmplt";
+            case GTE -> "if_icmpte";*/
+            case LTH -> "isub\niflt";
+            case GTE -> "isub\nifle";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         }).append(NL);
 
