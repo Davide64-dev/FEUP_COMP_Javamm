@@ -17,8 +17,3 @@ Contains a reference implementation for an initial version of the project that s
 ## Self-Assessment
 
 - We think our project deserves a 15 out of 20.
-
-## Extra Elements
-
-(Optional)
-- Our project supports...
